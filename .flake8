@@ -1,0 +1,23 @@
+[flake8]
+max-line-length = 120
+extend-ignore = E203,W503,D100,D101,D102,D103,D104,D105,D107,D200,D202,D205,D301,D400,D401,D403,E722,B001,B014,B017,F541
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    env,
+    build,
+    dist,
+    *.egg-info
+per-file-ignores =
+    # Tests can have unused imports, variables, long lines
+    tests/*:F401,F811,F841,E402,B007,E501
+    # __init__ files can have unused imports (re-exports)
+    __init__.py:F401
+    # conftest.py needs imports after sys.path manipulation
+    conftest.py:E402
+    # Server file can have unused imports and long lines
+    server.py:F401,E741,E501
+    # Client can have unused imports
+    qgis_mcp_client_secure.py:F401,F841
