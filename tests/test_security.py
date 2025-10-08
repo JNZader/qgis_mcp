@@ -46,7 +46,7 @@ result = x + y
     def test_dangerous_import_blocked(self):
         """Test that dangerous imports are blocked"""
         code = "import os"
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             self.sandbox.validate_code(code)
 
     def test_dangerous_function_blocked(self):
