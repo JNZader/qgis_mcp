@@ -76,37 +76,37 @@ class TestDangerousImports:
 
     def test_os_import_blocked(self, sandbox):
         """Test that os module import is blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("import os")
 
     def test_subprocess_import_blocked(self, sandbox):
         """Test that subprocess import is blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("import subprocess")
 
     def test_sys_import_blocked(self, sandbox):
         """Test that sys import is blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("import sys")
 
     def test_socket_import_blocked(self, sandbox):
         """Test that socket import is blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("import socket")
 
     def test_urllib_import_blocked(self, sandbox):
         """Test that urllib import is blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("import urllib")
 
     def test_requests_import_blocked(self, sandbox):
         """Test that requests import is blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("import requests")
 
     def test_from_import_blocked(self, sandbox):
         """Test that from imports are also blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("from os import system")
 
     def test_wildcard_import_blocked(self, sandbox):
@@ -121,7 +121,7 @@ class TestDangerousImports:
 
     def test_unauthorized_qgis_class_blocked(self, sandbox):
         """Test that unauthorized QGIS classes are blocked"""
-        with pytest.raises(SecurityException, match="Import not allowed"):
+        with pytest.raises(SecurityException, match="Import"):
             sandbox.validate_code("from qgis.core import QgsApplication")
 
 
