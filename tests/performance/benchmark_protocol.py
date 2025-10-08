@@ -3,9 +3,9 @@ Benchmark protocol performance
 Tests throughput and latency of BufferedProtocolHandler vs naive parsing
 """
 
-import time
 import json
 import struct
+import time
 from io import BytesIO
 
 try:

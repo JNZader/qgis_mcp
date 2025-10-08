@@ -11,10 +11,11 @@ Tests cover:
 - Token lifecycle
 """
 
-import pytest
-import time
 import hmac
+import time
 from pathlib import Path
+
+import pytest
 from security_improved import AuthenticationManager, SecureTokenStorage, SecurityException
 
 

@@ -2,11 +2,12 @@
 Pytest fixtures for performance benchmarks
 """
 
-import pytest
-import socket
 import json
+import socket
 import struct
-from typing import Dict, Any
+from typing import Any, Dict
+
+import pytest
 
 try:
     import msgpack

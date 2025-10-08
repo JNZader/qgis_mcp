@@ -11,12 +11,13 @@ Tests cover:
 - Server/client modes
 """
 
-import pytest
-import ssl
 import socket
+import ssl
 import time
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
+
+import pytest
 
 
 class TestCertificateGeneration:

@@ -10,11 +10,11 @@ Transport: stdio
 Format: JSON-RPC 2.0
 """
 
-import sys
 import json
 import logging
-from typing import Any, Dict, List, Optional
+import sys
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -271,14 +271,14 @@ class QGISMCPServer:
         logger.info(f"Calling tool: {tool_name} with arguments: {arguments}")
 
         # Import QGIS modules
-        from qgis.core import (
-            QgsVectorLayer,
-            QgsProject,
-            QgsFeature,
-            QgsProcessingFeedback,
-            QgsProcessing,
-        )
         import processing
+        from qgis.core import (
+            QgsFeature,
+            QgsProcessing,
+            QgsProcessingFeedback,
+            QgsProject,
+            QgsVectorLayer,
+        )
 
         try:
             if tool_name == "list_layers":
@@ -526,7 +526,7 @@ class QGISMCPServer:
                 height = arguments.get("height", 1080)
                 format_type = arguments.get("format", "PNG")
 
-                from qgis.core import QgsMapSettings, QgsMapRendererParallelJob
+                from qgis.core import QgsMapRendererParallelJob, QgsMapSettings
                 from qgis.PyQt.QtCore import QSize
 
                 # Setup map settings

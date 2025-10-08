@@ -4,22 +4,23 @@ Unit tests for security improvements
 Run with: pytest tests/test_security.py -v
 """
 
-import pytest
 import ast
-from pathlib import Path
-import tempfile
 import os
 
 # Import security modules
 import sys
+import tempfile
+from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "qgis_mcp_plugin"))
 
 from security_improved import (
-    ImprovedCodeSandbox,
-    EnhancedPathValidator,
-    ImprovedRateLimiter,
     AuthenticationManager,
+    EnhancedPathValidator,
+    ImprovedCodeSandbox,
+    ImprovedRateLimiter,
     SecureTokenStorage,
     SecurityException,
 )

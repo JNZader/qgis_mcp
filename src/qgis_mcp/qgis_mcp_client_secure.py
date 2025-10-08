@@ -16,25 +16,25 @@ import socket
 import threading
 import time
 import uuid
-from typing import Dict, Any, Optional, List
-from pathlib import Path
-from queue import Queue, Empty
 from contextlib import contextmanager
+from pathlib import Path
+from queue import Empty, Queue
+from typing import Any, Dict, List, Optional
 
 # Import protocol and TLS handler from plugin (should be available in Python path)
 try:
-    from qgis_mcp_plugin.protocol import ProtocolHandler, ProtocolException
-    from qgis_mcp_plugin.tls_handler import TLSHandler
+    from qgis_mcp_plugin.protocol import ProtocolException, ProtocolHandler
     from qgis_mcp_plugin.security_improved import SecureTokenStorage
+    from qgis_mcp_plugin.tls_handler import TLSHandler
 except ImportError:
     # Fallback for standalone usage
     import sys
 
     plugin_path = Path(__file__).parent.parent.parent / "qgis_mcp_plugin"
     sys.path.insert(0, str(plugin_path))
-    from protocol import ProtocolHandler, ProtocolException
-    from tls_handler import TLSHandler
+    from protocol import ProtocolException, ProtocolHandler
     from security_improved import SecureTokenStorage
+    from tls_handler import TLSHandler
 
 
 class ClientException(Exception):

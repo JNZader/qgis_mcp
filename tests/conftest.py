@@ -4,28 +4,28 @@ Pytest configuration and shared fixtures for QGIS MCP test suite
 This module provides reusable fixtures for all test modules.
 """
 
-import pytest
-import tempfile
 import socket
+import sys
+import tempfile
 import threading
 import time
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
-import sys
+from unittest.mock import MagicMock, Mock
+
+import pytest
 
 # Add plugin to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "qgis_mcp_plugin"))
 
+from protocol import BufferedProtocolHandler, ProtocolHandler
 from security_improved import (
-    ImprovedCodeSandbox,
-    EnhancedPathValidator,
-    ImprovedRateLimiter,
     AuthenticationManager,
+    EnhancedPathValidator,
+    ImprovedCodeSandbox,
+    ImprovedRateLimiter,
     SecureTokenStorage,
 )
-from protocol import ProtocolHandler, BufferedProtocolHandler
 from tls_handler import TLSHandler
-
 
 # ============================================================================
 # Mock QGIS Components

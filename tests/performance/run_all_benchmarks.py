@@ -4,8 +4,8 @@ Run all performance benchmarks and generate comprehensive report
 
 import sys
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Add module path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))

@@ -3,9 +3,9 @@ Benchmark async operations
 Tests async vs sync execution and threading overhead
 """
 
-import time
-import threading
 import sys
+import threading
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))

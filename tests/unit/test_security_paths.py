@@ -15,11 +15,12 @@ Tests cover:
 - Various encoding bypasses
 """
 
-import pytest
 import os
 import tempfile
-from pathlib import Path
 import urllib.parse
+from pathlib import Path
+
+import pytest
 from security_improved import EnhancedPathValidator, SecurityException
 
 

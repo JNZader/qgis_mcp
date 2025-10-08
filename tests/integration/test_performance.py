@@ -11,9 +11,10 @@ Tests cover:
 - Concurrent operations
 """
 
-import pytest
-import time
 import gc
+import time
+
+import pytest
 
 
 @pytest.mark.slow

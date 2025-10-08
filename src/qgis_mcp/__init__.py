@@ -32,7 +32,7 @@ Client:
         features = client.get_features(layer_id='layer_1', limit=100)
 """
 
-from .qgis_mcp_client_secure import SecureQGISMCPClient, ClientException, connect
+from .qgis_mcp_client_secure import ClientException, SecureQGISMCPClient, connect
 
 __version__ = "2.0.0-secure"
 __all__ = [

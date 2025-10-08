@@ -11,8 +11,9 @@ Tests cover:
 - Session management
 """
 
-import pytest
 import time
+
+import pytest
 
 
 class TestAuthenticationFlow:

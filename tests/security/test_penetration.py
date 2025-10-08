@@ -12,9 +12,10 @@ Tests cover:
 - Privilege escalation attempts
 """
 
-import pytest
-import time
 import socket
+import time
+
+import pytest
 
 
 @pytest.mark.security
@@ -103,6 +104,7 @@ class TestPathTraversalAttacks:
     def test_symlink_attack_blocked(self, path_validator, temp_dir):
         """Test that symlink attacks are blocked"""
         import os
+
         from security_improved import SecurityException
 
         if os.name == "nt":
@@ -308,8 +310,9 @@ class TestProtocolManipulation:
 
     def test_invalid_message_length_rejected(self, buffered_protocol):
         """Test that invalid message lengths are rejected"""
-        from protocol import ProtocolException
         import struct
+
+        from protocol import ProtocolException
 
         # Create header with impossible size
         invalid_size = buffered_protocol.MAX_MESSAGE_SIZE + 1
@@ -322,8 +325,9 @@ class TestProtocolManipulation:
 
     def test_zero_length_message_rejected(self, buffered_protocol):
         """Test that zero-length messages are rejected"""
-        from protocol import ProtocolException
         import struct
+
+        from protocol import ProtocolException
 
         header = struct.pack(buffered_protocol.MESSAGE_HEADER_FORMAT, 0)
 
@@ -334,8 +338,9 @@ class TestProtocolManipulation:
 
     def test_malformed_json_rejected(self, buffered_protocol):
         """Test that malformed JSON is rejected"""
-        from protocol import ProtocolException
         import struct
+
+        from protocol import ProtocolException
 
         malformed_json = b'{"type": invalid, "id": "msg_001"}'
         header = struct.pack(buffered_protocol.MESSAGE_HEADER_FORMAT, len(malformed_json))

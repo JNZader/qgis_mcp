@@ -11,10 +11,11 @@ Tests cover:
 - TLS integration
 """
 
-import pytest
 import socket
 import threading
 import time
+
+import pytest
 from protocol import ProtocolHandler
 
 

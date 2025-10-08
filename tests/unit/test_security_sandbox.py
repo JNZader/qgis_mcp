@@ -13,9 +13,10 @@ Tests cover:
 - Bypass attempt prevention
 """
 
-import pytest
 import ast
 import time
+
+import pytest
 from security_improved import ImprovedCodeSandbox, SecurityException
 
 

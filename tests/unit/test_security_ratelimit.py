@@ -12,8 +12,9 @@ Tests cover:
 - Cleanup mechanisms
 """
 
-import pytest
 import time
+
+import pytest
 from security_improved import ImprovedRateLimiter, SecurityException
 
 

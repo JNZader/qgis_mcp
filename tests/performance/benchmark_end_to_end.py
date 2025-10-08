@@ -3,12 +3,12 @@ End-to-end performance benchmarks
 Tests realistic workflows and sustained load
 """
 
-import time
-import threading
 import random
 import sys
-from pathlib import Path
+import threading
+import time
 from collections import defaultdict
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))
 

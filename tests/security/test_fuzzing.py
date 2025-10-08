@@ -10,9 +10,10 @@ Tests cover:
 - Special character injection
 """
 
-import pytest
 import random
 import string
+
+import pytest
 
 
 @pytest.mark.security

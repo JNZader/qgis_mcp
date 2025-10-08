@@ -12,10 +12,11 @@ Tests cover:
 - Error handling
 """
 
-import pytest
-import struct
 import json
-from protocol import ProtocolHandler, BufferedProtocolHandler, ProtocolException, MESSAGE_SCHEMAS
+import struct
+
+import pytest
+from protocol import MESSAGE_SCHEMAS, BufferedProtocolHandler, ProtocolException, ProtocolHandler
 
 
 class TestMessageSerialization:
