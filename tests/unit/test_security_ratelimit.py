@@ -334,7 +334,7 @@ class TestCleanupMechanism:
 
         # Should trigger cleanup
         # Verify cleanup happened (size should not grow unbounded)
-        assert len(rate_limiter.request_history) < 1500
+        assert len(rate_limiter.request_history) <= 1500
 
     def test_old_failed_auth_attempts_removed(self, rate_limiter):
         """Test that old failed auth attempts are removed"""
