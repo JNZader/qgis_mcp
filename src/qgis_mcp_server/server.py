@@ -19,8 +19,8 @@ from pathlib import Path
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler('qgis_mcp_server.log'), logging.StreamHandler(sys.stderr)]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("qgis_mcp_server.log"), logging.StreamHandler(sys.stderr)],
 )
 logger = logging.getLogger(__name__)
 
@@ -70,35 +70,22 @@ class QGISMCPServer:
             else:
                 raise ValueError(f"Unknown method: {method}")
 
-            return {
-                "jsonrpc": "2.0",
-                "id": request_id,
-                "result": result
-            }
+            return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
         except Exception as e:
             logger.error(f"Error handling request: {e}", exc_info=True)
             return {
                 "jsonrpc": "2.0",
                 "id": request_id,
-                "error": {
-                    "code": -32603,
-                    "message": str(e)
-                }
+                "error": {"code": -32603, "message": str(e)},
             }
 
     def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle initialize request"""
         return {
             "protocolVersion": "0.1.0",
-            "serverInfo": {
-                "name": "qgis-mcp-server",
-                "version": "1.0.0"
-            },
-            "capabilities": {
-                "tools": {},
-                "prompts": {}
-            }
+            "serverInfo": {"name": "qgis-mcp-server", "version": "1.0.0"},
+            "capabilities": {"tools": {}, "prompts": {}},
         }
 
     def _handle_list_tools(self) -> Dict[str, Any]:
@@ -108,11 +95,7 @@ class QGISMCPServer:
                 {
                     "name": "list_layers",
                     "description": "List all layers in the current QGIS project",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
+                    "inputSchema": {"type": "object", "properties": {}, "required": []},
                 },
                 {
                     "name": "add_vector_layer",
@@ -122,15 +105,12 @@ class QGISMCPServer:
                         "properties": {
                             "path": {
                                 "type": "string",
-                                "description": "Path to the vector file (shapefile, GeoJSON, etc.)"
+                                "description": "Path to the vector file (shapefile, GeoJSON, etc.)",
                             },
-                            "name": {
-                                "type": "string",
-                                "description": "Name for the layer in QGIS"
-                            }
+                            "name": {"type": "string", "description": "Name for the layer in QGIS"},
                         },
-                        "required": ["path", "name"]
-                    }
+                        "required": ["path", "name"],
+                    },
                 },
                 {
                     "name": "get_layer_info",
@@ -138,13 +118,10 @@ class QGISMCPServer:
                     "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "layer_name": {
-                                "type": "string",
-                                "description": "Name of the layer"
-                            }
+                            "layer_name": {"type": "string", "description": "Name of the layer"}
                         },
-                        "required": ["layer_name"]
-                    }
+                        "required": ["layer_name"],
+                    },
                 },
                 {
                     "name": "get_features",
@@ -152,22 +129,19 @@ class QGISMCPServer:
                     "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "layer_name": {
-                                "type": "string",
-                                "description": "Name of the layer"
-                            },
+                            "layer_name": {"type": "string", "description": "Name of the layer"},
                             "limit": {
                                 "type": "integer",
                                 "description": "Maximum number of features to return",
-                                "default": 10
+                                "default": 10,
                             },
                             "filter": {
                                 "type": "string",
-                                "description": "Optional filter expression (e.g., 'population > 1000000')"
-                            }
+                                "description": "Optional filter expression (e.g., 'population > 1000000')",
+                            },
                         },
-                        "required": ["layer_name"]
-                    }
+                        "required": ["layer_name"],
+                    },
                 },
                 {
                     "name": "buffer_layer",
@@ -177,19 +151,19 @@ class QGISMCPServer:
                         "properties": {
                             "layer_name": {
                                 "type": "string",
-                                "description": "Name of the input layer"
+                                "description": "Name of the input layer",
                             },
                             "distance": {
                                 "type": "number",
-                                "description": "Buffer distance in layer units"
+                                "description": "Buffer distance in layer units",
                             },
                             "output_name": {
                                 "type": "string",
-                                "description": "Name for the output buffer layer"
-                            }
+                                "description": "Name for the output buffer layer",
+                            },
                         },
-                        "required": ["layer_name", "distance", "output_name"]
-                    }
+                        "required": ["layer_name", "distance", "output_name"],
+                    },
                 },
                 {
                     "name": "clip_layer",
@@ -199,19 +173,19 @@ class QGISMCPServer:
                         "properties": {
                             "input_layer": {
                                 "type": "string",
-                                "description": "Name of the layer to clip"
+                                "description": "Name of the layer to clip",
                             },
                             "clip_layer": {
                                 "type": "string",
-                                "description": "Name of the layer to use as clip boundary"
+                                "description": "Name of the layer to use as clip boundary",
                             },
                             "output_name": {
                                 "type": "string",
-                                "description": "Name for the clipped output layer"
-                            }
+                                "description": "Name for the clipped output layer",
+                            },
                         },
-                        "required": ["input_layer", "clip_layer", "output_name"]
-                    }
+                        "required": ["input_layer", "clip_layer", "output_name"],
+                    },
                 },
                 {
                     "name": "calculate_statistics",
@@ -219,17 +193,14 @@ class QGISMCPServer:
                     "inputSchema": {
                         "type": "object",
                         "properties": {
-                            "layer_name": {
-                                "type": "string",
-                                "description": "Name of the layer"
-                            },
+                            "layer_name": {"type": "string", "description": "Name of the layer"},
                             "field_name": {
                                 "type": "string",
-                                "description": "Name of the field to analyze"
-                            }
+                                "description": "Name of the field to analyze",
+                            },
                         },
-                        "required": ["layer_name", "field_name"]
-                    }
+                        "required": ["layer_name", "field_name"],
+                    },
                 },
                 {
                     "name": "export_map",
@@ -239,27 +210,27 @@ class QGISMCPServer:
                         "properties": {
                             "output_path": {
                                 "type": "string",
-                                "description": "Path where to save the image"
+                                "description": "Path where to save the image",
                             },
                             "width": {
                                 "type": "integer",
                                 "description": "Image width in pixels",
-                                "default": 1920
+                                "default": 1920,
                             },
                             "height": {
                                 "type": "integer",
                                 "description": "Image height in pixels",
-                                "default": 1080
+                                "default": 1080,
                             },
                             "format": {
                                 "type": "string",
                                 "enum": ["PNG", "JPG", "PDF"],
                                 "description": "Output format",
-                                "default": "PNG"
-                            }
+                                "default": "PNG",
+                            },
                         },
-                        "required": ["output_path"]
-                    }
+                        "required": ["output_path"],
+                    },
                 },
                 {
                     "name": "load_project",
@@ -269,11 +240,11 @@ class QGISMCPServer:
                         "properties": {
                             "project_path": {
                                 "type": "string",
-                                "description": "Path to the .qgs or .qgz project file"
+                                "description": "Path to the .qgs or .qgz project file",
                             }
                         },
-                        "required": ["project_path"]
-                    }
+                        "required": ["project_path"],
+                    },
                 },
                 {
                     "name": "save_project",
@@ -283,12 +254,12 @@ class QGISMCPServer:
                         "properties": {
                             "project_path": {
                                 "type": "string",
-                                "description": "Path where to save the project"
+                                "description": "Path where to save the project",
                             }
                         },
-                        "required": ["project_path"]
-                    }
-                }
+                        "required": ["project_path"],
+                    },
+                },
             ]
         }
 
@@ -301,8 +272,11 @@ class QGISMCPServer:
 
         # Import QGIS modules
         from qgis.core import (
-            QgsVectorLayer, QgsProject, QgsFeature,
-            QgsProcessingFeedback, QgsProcessing
+            QgsVectorLayer,
+            QgsProject,
+            QgsFeature,
+            QgsProcessingFeedback,
+            QgsProcessing,
         )
         import processing
 
@@ -310,21 +284,33 @@ class QGISMCPServer:
             if tool_name == "list_layers":
                 layers = []
                 for layer_id, layer in self.project.mapLayers().items():
-                    layers.append({
-                        "id": layer_id,
-                        "name": layer.name(),
-                        "type": layer.type().name if hasattr(layer.type(), 'name') else str(layer.type()),
-                        "featureCount": layer.featureCount() if hasattr(layer, 'featureCount') else 0,
-                        "crs": layer.crs().authid() if layer.crs() else "Unknown"
-                    })
+                    layers.append(
+                        {
+                            "id": layer_id,
+                            "name": layer.name(),
+                            "type": (
+                                layer.type().name
+                                if hasattr(layer.type(), "name")
+                                else str(layer.type())
+                            ),
+                            "featureCount": (
+                                layer.featureCount() if hasattr(layer, "featureCount") else 0
+                            ),
+                            "crs": layer.crs().authid() if layer.crs() else "Unknown",
+                        }
+                    )
 
                 return {
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Found {len(layers)} layers:\n" +
-                                   "\n".join([f"- {l['name']} ({l['type']}, {l['featureCount']} features)"
-                                            for l in layers])
+                            "text": f"Found {len(layers)} layers:\n"
+                            + "\n".join(
+                                [
+                                    f"- {l['name']} ({l['type']}, {l['featureCount']} features)"
+                                    for l in layers
+                                ]
+                            ),
                         }
                     ]
                 }
@@ -343,7 +329,7 @@ class QGISMCPServer:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Successfully added layer '{name}' with {layer.featureCount()} features"
+                            "text": f"Successfully added layer '{name}' with {layer.featureCount()} features",
                         }
                     ]
                 }
@@ -361,26 +347,21 @@ class QGISMCPServer:
 
                 info = {
                     "name": layer.name(),
-                    "type": layer.type().name if hasattr(layer.type(), 'name') else str(layer.type()),
-                    "featureCount": layer.featureCount() if hasattr(layer, 'featureCount') else 0,
+                    "type": (
+                        layer.type().name if hasattr(layer.type(), "name") else str(layer.type())
+                    ),
+                    "featureCount": layer.featureCount() if hasattr(layer, "featureCount") else 0,
                     "crs": layer.crs().authid(),
                     "extent": {
                         "xMin": extent.xMinimum(),
                         "yMin": extent.yMinimum(),
                         "xMax": extent.xMaximum(),
-                        "yMax": extent.yMaximum()
+                        "yMax": extent.yMaximum(),
                     },
-                    "fields": fields
+                    "fields": fields,
                 }
 
-                return {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": json.dumps(info, indent=2)
-                        }
-                    ]
-                }
+                return {"content": [{"type": "text", "text": json.dumps(info, indent=2)}]}
 
             elif tool_name == "get_features":
                 layer_name = arguments["layer_name"]
@@ -402,13 +383,14 @@ class QGISMCPServer:
                     if i >= limit:
                         break
 
-                    features.append({
-                        "id": feature.id(),
-                        "attributes": dict(zip(
-                            [f.name() for f in layer.fields()],
-                            feature.attributes()
-                        ))
-                    })
+                    features.append(
+                        {
+                            "id": feature.id(),
+                            "attributes": dict(
+                                zip([f.name() for f in layer.fields()], feature.attributes())
+                            ),
+                        }
+                    )
 
                 # Clear filter
                 if filter_expr:
@@ -416,10 +398,7 @@ class QGISMCPServer:
 
                 return {
                     "content": [
-                        {
-                            "type": "text",
-                            "text": json.dumps(features, indent=2, default=str)
-                        }
+                        {"type": "text", "text": json.dumps(features, indent=2, default=str)}
                     ]
                 }
 
@@ -435,16 +414,19 @@ class QGISMCPServer:
                 input_layer = layers[0]
 
                 # Run buffer processing
-                result = processing.run("native:buffer", {
-                    'INPUT': input_layer,
-                    'DISTANCE': distance,
-                    'SEGMENTS': 10,
-                    'END_CAP_STYLE': 0,
-                    'JOIN_STYLE': 0,
-                    'OUTPUT': 'memory:' + output_name
-                })
+                result = processing.run(
+                    "native:buffer",
+                    {
+                        "INPUT": input_layer,
+                        "DISTANCE": distance,
+                        "SEGMENTS": 10,
+                        "END_CAP_STYLE": 0,
+                        "JOIN_STYLE": 0,
+                        "OUTPUT": "memory:" + output_name,
+                    },
+                )
 
-                output_layer = result['OUTPUT']
+                output_layer = result["OUTPUT"]
                 output_layer.setName(output_name)
                 self.project.addMapLayer(output_layer)
 
@@ -452,7 +434,7 @@ class QGISMCPServer:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Created buffer layer '{output_name}' with {output_layer.featureCount()} features"
+                            "text": f"Created buffer layer '{output_name}' with {output_layer.featureCount()} features",
                         }
                     ]
                 }
@@ -470,13 +452,16 @@ class QGISMCPServer:
                 if not clip_layers:
                     raise ValueError(f"Clip layer '{clip_layer_name}' not found")
 
-                result = processing.run("native:clip", {
-                    'INPUT': input_layers[0],
-                    'OVERLAY': clip_layers[0],
-                    'OUTPUT': 'memory:' + output_name
-                })
+                result = processing.run(
+                    "native:clip",
+                    {
+                        "INPUT": input_layers[0],
+                        "OVERLAY": clip_layers[0],
+                        "OUTPUT": "memory:" + output_name,
+                    },
+                )
 
-                output_layer = result['OUTPUT']
+                output_layer = result["OUTPUT"]
                 output_layer.setName(output_name)
                 self.project.addMapLayer(output_layer)
 
@@ -484,7 +469,7 @@ class QGISMCPServer:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Created clipped layer '{output_name}' with {output_layer.featureCount()} features"
+                            "text": f"Created clipped layer '{output_name}' with {output_layer.featureCount()} features",
                         }
                     ]
                 }
@@ -505,8 +490,11 @@ class QGISMCPServer:
                     raise ValueError(f"Field '{field_name}' not found in layer")
 
                 # Calculate statistics
-                values = [f.attributes()[field_index] for f in layer.getFeatures()
-                         if f.attributes()[field_index] is not None]
+                values = [
+                    f.attributes()[field_index]
+                    for f in layer.getFeatures()
+                    if f.attributes()[field_index] is not None
+                ]
 
                 if not values:
                     raise ValueError(f"No valid values found for field '{field_name}'")
@@ -520,24 +508,17 @@ class QGISMCPServer:
                         "max": max(values),
                         "sum": sum(values),
                         "mean": sum(values) / len(values),
-                        "field": field_name
+                        "field": field_name,
                     }
                 except (ValueError, TypeError):
                     # Non-numeric field
                     stats = {
                         "count": len(values),
                         "unique_values": len(set(values)),
-                        "field": field_name
+                        "field": field_name,
                     }
 
-                return {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": json.dumps(stats, indent=2)
-                        }
-                    ]
-                }
+                return {"content": [{"type": "text", "text": json.dumps(stats, indent=2)}]}
 
             elif tool_name == "export_map":
                 output_path = arguments["output_path"]
@@ -552,7 +533,11 @@ class QGISMCPServer:
                 settings = QgsMapSettings()
                 settings.setLayers(self.project.mapLayers().values())
                 settings.setOutputSize(QSize(width, height))
-                settings.setExtent(self.project.mapLayers().values()[0].extent() if self.project.mapLayers() else None)
+                settings.setExtent(
+                    self.project.mapLayers().values()[0].extent()
+                    if self.project.mapLayers()
+                    else None
+                )
 
                 # Render
                 render = QgsMapRendererParallelJob(settings)
@@ -566,7 +551,7 @@ class QGISMCPServer:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Map exported to {output_path} ({width}x{height}, {format_type})"
+                            "text": f"Map exported to {output_path} ({width}x{height}, {format_type})",
                         }
                     ]
                 }
@@ -584,7 +569,7 @@ class QGISMCPServer:
                     "content": [
                         {
                             "type": "text",
-                            "text": f"Loaded project from {project_path} with {len(layers)} layers"
+                            "text": f"Loaded project from {project_path} with {len(layers)} layers",
                         }
                     ]
                 }
@@ -594,29 +579,14 @@ class QGISMCPServer:
 
                 self.project.write(project_path)
 
-                return {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": f"Project saved to {project_path}"
-                        }
-                    ]
-                }
+                return {"content": [{"type": "text", "text": f"Project saved to {project_path}"}]}
 
             else:
                 raise ValueError(f"Unknown tool: {tool_name}")
 
         except Exception as e:
             logger.error(f"Error executing tool {tool_name}: {e}", exc_info=True)
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Error: {str(e)}"
-                    }
-                ],
-                "isError": True
-            }
+            return {"content": [{"type": "text", "text": f"Error: {str(e)}"}], "isError": True}
 
     def _handle_list_prompts(self) -> Dict[str, Any]:
         """List available prompts"""
@@ -629,9 +599,9 @@ class QGISMCPServer:
                         {
                             "name": "layer_name",
                             "description": "Name of the layer to analyze",
-                            "required": True
+                            "required": True,
                         }
-                    ]
+                    ],
                 },
                 {
                     "name": "create_map",
@@ -640,9 +610,9 @@ class QGISMCPServer:
                         {
                             "name": "purpose",
                             "description": "Purpose of the map (e.g., 'show population density')",
-                            "required": True
+                            "required": True,
                         }
-                    ]
+                    ],
                 },
                 {
                     "name": "spatial_analysis",
@@ -651,10 +621,10 @@ class QGISMCPServer:
                         {
                             "name": "objective",
                             "description": "What you want to analyze",
-                            "required": True
+                            "required": True,
                         }
-                    ]
-                }
+                    ],
+                },
             ]
         }
 
@@ -672,12 +642,12 @@ class QGISMCPServer:
                         "content": {
                             "type": "text",
                             "text": f"Please analyze the layer '{layer_name}' and provide insights about:\n"
-                                   f"- Feature count and distribution\n"
-                                   f"- Attribute statistics\n"
-                                   f"- Spatial extent and CRS\n"
-                                   f"- Data quality observations\n"
-                                   f"- Suggested visualizations or analyses"
-                        }
+                            f"- Feature count and distribution\n"
+                            f"- Attribute statistics\n"
+                            f"- Spatial extent and CRS\n"
+                            f"- Data quality observations\n"
+                            f"- Suggested visualizations or analyses",
+                        },
                     }
                 ]
             }
@@ -691,11 +661,11 @@ class QGISMCPServer:
                         "content": {
                             "type": "text",
                             "text": f"I want to create a map to {purpose}. Please:\n"
-                                   f"1. List available layers\n"
-                                   f"2. Suggest which layers to include\n"
-                                   f"3. Recommend styling and symbology\n"
-                                   f"4. Guide me through the map creation process"
-                        }
+                            f"1. List available layers\n"
+                            f"2. Suggest which layers to include\n"
+                            f"3. Recommend styling and symbology\n"
+                            f"4. Guide me through the map creation process",
+                        },
                     }
                 ]
             }
@@ -709,11 +679,11 @@ class QGISMCPServer:
                         "content": {
                             "type": "text",
                             "text": f"I want to {objective}. Please:\n"
-                                   f"1. Understand available data\n"
-                                   f"2. Design an analysis workflow\n"
-                                   f"3. Execute the analysis step by step\n"
-                                   f"4. Interpret and visualize results"
-                        }
+                            f"1. Understand available data\n"
+                            f"2. Design an analysis workflow\n"
+                            f"3. Execute the analysis step by step\n"
+                            f"4. Interpret and visualize results",
+                        },
                     }
                 ]
             }

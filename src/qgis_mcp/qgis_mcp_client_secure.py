@@ -29,7 +29,8 @@ try:
 except ImportError:
     # Fallback for standalone usage
     import sys
-    plugin_path = Path(__file__).parent.parent.parent / 'qgis_mcp_plugin'
+
+    plugin_path = Path(__file__).parent.parent.parent / "qgis_mcp_plugin"
     sys.path.insert(0, str(plugin_path))
     from protocol import ProtocolHandler, ProtocolException
     from tls_handler import TLSHandler
@@ -38,6 +39,7 @@ except ImportError:
 
 class ClientException(Exception):
     """Raised when client operation fails"""
+
     pass
 
 
@@ -50,7 +52,7 @@ class ConnectionPool:
         port: int,
         max_connections: int = 5,
         use_tls: bool = False,
-        connection_timeout: float = 10.0
+        connection_timeout: float = 10.0,
     ):
         """
         Initialize connection pool
@@ -92,9 +94,7 @@ class ConnectionPool:
             # Wrap with TLS if enabled
             if self.use_tls and self._tls_handler:
                 sock = self._tls_handler.wrap_socket(
-                    sock,
-                    server_side=False,
-                    verify_cert=False  # Self-signed certificates
+                    sock, server_side=False, verify_cert=False  # Self-signed certificates
                 )
 
             return sock
@@ -203,14 +203,14 @@ class SecureQGISMCPClient:
 
     def __init__(
         self,
-        host: str = '127.0.0.1',
+        host: str = "127.0.0.1",
         port: int = 9876,
         token: Optional[str] = None,
         use_tls: bool = False,
         auto_authenticate: bool = True,
         max_connections: int = 5,
         request_timeout: float = 30.0,
-        max_retries: int = 3
+        max_retries: int = 3,
     ):
         """
         Initialize secure QGIS MCP client
@@ -250,7 +250,7 @@ class SecureQGISMCPClient:
             port=port,
             max_connections=max_connections,
             use_tls=use_tls,
-            connection_timeout=10.0
+            connection_timeout=10.0,
         )
 
         # Protocol handler
@@ -279,9 +279,9 @@ class SecureQGISMCPClient:
 
             # Send authentication request
             auth_msg = {
-                'type': 'authenticate',
-                'id': str(uuid.uuid4()),
-                'data': {'token': self.token}
+                "type": "authenticate",
+                "id": str(uuid.uuid4()),
+                "data": {"token": self.token},
             }
 
             try:
@@ -291,8 +291,8 @@ class SecureQGISMCPClient:
                 if not response:
                     raise ClientException("No response from server")
 
-                if not response.get('success'):
-                    error = response.get('error', 'Unknown error')
+                if not response.get("success"):
+                    error = response.get("error", "Unknown error")
                     raise ClientException(f"Authentication failed: {error}")
 
                 self.authenticated = True
@@ -301,10 +301,7 @@ class SecureQGISMCPClient:
                 raise ClientException(f"Authentication error: {e}")
 
     def send_request(
-        self,
-        msg_type: str,
-        data: Optional[Dict[str, Any]] = None,
-        skip_auth: bool = False
+        self, msg_type: str, data: Optional[Dict[str, Any]] = None, skip_auth: bool = False
     ) -> Dict[str, Any]:
         """
         Send request to server with automatic retry
@@ -331,11 +328,11 @@ class SecureQGISMCPClient:
 
                     # Build message
                     message = {
-                        'type': msg_type,
-                        'id': str(uuid.uuid4()),
+                        "type": msg_type,
+                        "id": str(uuid.uuid4()),
                     }
                     if data:
-                        message['data'] = data
+                        message["data"] = data
 
                     # Send request
                     self.protocol.send_message(conn, message)
@@ -346,11 +343,11 @@ class SecureQGISMCPClient:
                     if not response:
                         raise ClientException("No response from server")
 
-                    if not response.get('success'):
-                        error = response.get('error', 'Unknown error')
+                    if not response.get("success"):
+                        error = response.get("error", "Unknown error")
                         raise ClientException(f"Server error: {error}")
 
-                    return response.get('data', {})
+                    return response.get("data", {})
 
             except (socket.error, ProtocolException, ClientException) as e:
                 last_error = e
@@ -360,7 +357,7 @@ class SecureQGISMCPClient:
 
                 if attempt < self.max_retries - 1:
                     # Wait before retry with exponential backoff
-                    wait_time = 0.5 * (2 ** attempt)
+                    wait_time = 0.5 * (2**attempt)
                     time.sleep(wait_time)
                     continue
                 else:
@@ -402,7 +399,7 @@ class SecureQGISMCPClient:
         Returns:
             Ping response data
         """
-        return self.send_request('ping')
+        return self.send_request("ping")
 
     def list_layers(self, offset: int = 0, limit: int = 50) -> Dict[str, Any]:
         """
@@ -415,7 +412,7 @@ class SecureQGISMCPClient:
         Returns:
             Layer list with metadata
         """
-        return self.send_request('list_layers', {'offset': offset, 'limit': limit})
+        return self.send_request("list_layers", {"offset": offset, "limit": limit})
 
     def get_features(
         self,
@@ -424,7 +421,7 @@ class SecureQGISMCPClient:
         bbox: Optional[Dict[str, float]] = None,
         filter_expression: Optional[str] = None,
         attributes_only: bool = False,
-        simplify_tolerance: Optional[float] = None
+        simplify_tolerance: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Get features from layer
@@ -440,21 +437,18 @@ class SecureQGISMCPClient:
         Returns:
             Features data
         """
-        data = {
-            'layer_id': layer_id,
-            'limit': limit
-        }
+        data = {"layer_id": layer_id, "limit": limit}
 
         if bbox:
-            data['bbox'] = bbox
+            data["bbox"] = bbox
         if filter_expression:
-            data['filter_expression'] = filter_expression
+            data["filter_expression"] = filter_expression
         if attributes_only:
-            data['attributes_only'] = attributes_only
+            data["attributes_only"] = attributes_only
         if simplify_tolerance:
-            data['simplify_tolerance'] = simplify_tolerance
+            data["simplify_tolerance"] = simplify_tolerance
 
-        return self.send_request('get_features', data)
+        return self.send_request("get_features", data)
 
     def load_layer(self, path: str, layer_name: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -467,11 +461,11 @@ class SecureQGISMCPClient:
         Returns:
             Layer information
         """
-        data = {'path': path}
+        data = {"path": path}
         if layer_name:
-            data['layer_name'] = layer_name
+            data["layer_name"] = layer_name
 
-        return self.send_request('load_layer', data)
+        return self.send_request("load_layer", data)
 
     def execute_code(self, code: str) -> Dict[str, Any]:
         """
@@ -487,7 +481,7 @@ class SecureQGISMCPClient:
             This is a powerful operation. Code is executed in a sandbox
             but should still be used with caution.
         """
-        return self.send_request('execute_code', {'code': code})
+        return self.send_request("execute_code", {"code": code})
 
     def get_stats(self) -> Dict[str, Any]:
         """
@@ -496,7 +490,7 @@ class SecureQGISMCPClient:
         Returns:
             Server statistics
         """
-        return self.send_request('get_stats')
+        return self.send_request("get_stats")
 
     def close(self) -> None:
         """Close all connections"""
@@ -513,10 +507,7 @@ class SecureQGISMCPClient:
 
 # Convenience function
 def connect(
-    host: str = '127.0.0.1',
-    port: int = 9876,
-    token: Optional[str] = None,
-    use_tls: bool = False
+    host: str = "127.0.0.1", port: int = 9876, token: Optional[str] = None, use_tls: bool = False
 ) -> SecureQGISMCPClient:
     """
     Create and connect secure QGIS MCP client
@@ -536,9 +527,5 @@ def connect(
         ...     print(layers)
     """
     return SecureQGISMCPClient(
-        host=host,
-        port=port,
-        token=token,
-        use_tls=use_tls,
-        auto_authenticate=True
+        host=host, port=port, token=token, use_tls=use_tls, auto_authenticate=True
     )

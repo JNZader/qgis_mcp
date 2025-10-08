@@ -10,6 +10,7 @@ from io import BytesIO
 
 try:
     import msgpack
+
     HAS_MSGPACK = True
 except ImportError:
     HAS_MSGPACK = False
@@ -18,7 +19,8 @@ except ImportError:
 # Import protocol handlers
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'qgis_mcp_plugin'))
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))
 
 from protocol import BufferedProtocolHandler, ProtocolHandler
 
@@ -30,12 +32,12 @@ def benchmark_naive_parsing(messages: list, iterations: int = 100):
     for _ in range(iterations):
         for msg_data in messages:
             # Simulate naive parsing
-            buffer = b''
+            buffer = b""
             buffer += msg_data
             try:
-                message = json.loads(buffer.decode('utf-8'))
+                message = json.loads(buffer.decode("utf-8"))
                 # Process message
-                _ = message['type']
+                _ = message["type"]
             except json.JSONDecodeError:
                 pass  # Wait for more data
 
@@ -43,10 +45,10 @@ def benchmark_naive_parsing(messages: list, iterations: int = 100):
     total_messages = len(messages) * iterations
 
     return {
-        'total_messages': total_messages,
-        'elapsed_seconds': elapsed,
-        'messages_per_second': total_messages / elapsed,
-        'avg_latency_ms': (elapsed / total_messages) * 1000
+        "total_messages": total_messages,
+        "elapsed_seconds": elapsed,
+        "messages_per_second": total_messages / elapsed,
+        "avg_latency_ms": (elapsed / total_messages) * 1000,
     }
 
 
@@ -64,16 +66,16 @@ def benchmark_buffered_protocol(messages: list, iterations: int = 100):
                 if msg is None:
                     break
                 # Process message
-                _ = msg['type']
+                _ = msg["type"]
 
     elapsed = time.time() - start
     total_messages = len(messages) * iterations
 
     return {
-        'total_messages': total_messages,
-        'elapsed_seconds': elapsed,
-        'messages_per_second': total_messages / elapsed,
-        'avg_latency_ms': (elapsed / total_messages) * 1000
+        "total_messages": total_messages,
+        "elapsed_seconds": elapsed,
+        "messages_per_second": total_messages / elapsed,
+        "avg_latency_ms": (elapsed / total_messages) * 1000,
     }
 
 
@@ -111,15 +113,15 @@ def benchmark_msgpack_vs_json(messages: list, iterations: int = 100):
     total_messages = len(messages) * iterations
 
     return {
-        'json': {
-            'elapsed_seconds': json_elapsed,
-            'messages_per_second': total_messages / json_elapsed,
+        "json": {
+            "elapsed_seconds": json_elapsed,
+            "messages_per_second": total_messages / json_elapsed,
         },
-        'msgpack': {
-            'elapsed_seconds': msgpack_elapsed,
-            'messages_per_second': total_messages / msgpack_elapsed,
+        "msgpack": {
+            "elapsed_seconds": msgpack_elapsed,
+            "messages_per_second": total_messages / msgpack_elapsed,
         },
-        'speedup': json_elapsed / msgpack_elapsed
+        "speedup": json_elapsed / msgpack_elapsed,
     }
 
 
@@ -130,9 +132,9 @@ def benchmark_fragmented_messages(num_messages: int = 100):
     # Create test messages
     messages = []
     for i in range(num_messages):
-        msg = {'type': 'ping', 'id': str(i)}
-        data = json.dumps(msg).encode('utf-8')
-        header = struct.pack('!I', len(data))
+        msg = {"type": "ping", "id": str(i)}
+        data = json.dumps(msg).encode("utf-8")
+        header = struct.pack("!I", len(data))
         messages.append(header + data)
 
     # Benchmark: feed data in small chunks (simulating network fragmentation)
@@ -142,7 +144,7 @@ def benchmark_fragmented_messages(num_messages: int = 100):
     for msg_bytes in messages:
         # Feed in 10-byte chunks
         for i in range(0, len(msg_bytes), 10):
-            chunk = msg_bytes[i:i+10]
+            chunk = msg_bytes[i : i + 10]
             handler.feed_data(chunk)
 
             # Try to read messages
@@ -155,11 +157,11 @@ def benchmark_fragmented_messages(num_messages: int = 100):
     elapsed = time.time() - start
 
     return {
-        'total_messages': num_messages,
-        'received_messages': received,
-        'elapsed_seconds': elapsed,
-        'messages_per_second': received / elapsed,
-        'handled_fragmentation': received == num_messages
+        "total_messages": num_messages,
+        "received_messages": received,
+        "elapsed_seconds": elapsed,
+        "messages_per_second": received / elapsed,
+        "handled_fragmentation": received == num_messages,
     }
 
 
@@ -173,12 +175,12 @@ def benchmark_large_messages(sizes: list = None):
 
     for size in sizes:
         # Create message with payload of specified size
-        payload = 'x' * size
-        msg = {'type': 'ping', 'id': '1', 'data': {'payload': payload}}
+        payload = "x" * size
+        msg = {"type": "ping", "id": "1", "data": {"payload": payload}}
 
         # Serialize
-        data = json.dumps(msg).encode('utf-8')
-        header = struct.pack('!I', len(data))
+        data = json.dumps(msg).encode("utf-8")
+        header = struct.pack("!I", len(data))
         full_msg = header + data
 
         # Benchmark
@@ -193,12 +195,12 @@ def benchmark_large_messages(sizes: list = None):
 
         elapsed = time.time() - start
 
-        results[f'{size // 1024}KB'] = {
-            'message_size_bytes': size,
-            'iterations': iterations,
-            'elapsed_seconds': elapsed,
-            'avg_latency_ms': (elapsed / iterations) * 1000,
-            'throughput_mbps': (size * iterations / elapsed) / (1024 * 1024) * 8
+        results[f"{size // 1024}KB"] = {
+            "message_size_bytes": size,
+            "iterations": iterations,
+            "elapsed_seconds": elapsed,
+            "avg_latency_ms": (elapsed / iterations) * 1000,
+            "throughput_mbps": (size * iterations / elapsed) / (1024 * 1024) * 8,
         }
 
     return results
@@ -216,9 +218,9 @@ def print_benchmark_results():
 
     for i in range(100):
         msg = {
-            'type': 'get_features' if i % 2 == 0 else 'list_layers',
-            'id': str(i),
-            'data': {'layer_id': f'layer_{i}', 'limit': 100}
+            "type": "get_features" if i % 2 == 0 else "list_layers",
+            "id": str(i),
+            "data": {"layer_id": f"layer_{i}", "limit": 100},
         }
         packed = handler.pack_message(msg)
         test_messages.append(packed)
@@ -237,7 +239,7 @@ def print_benchmark_results():
     print(f"  Messages/sec: {buffered_results['messages_per_second']:.1f}")
     print(f"  Avg Latency:  {buffered_results['avg_latency_ms']:.2f} ms")
 
-    speedup = buffered_results['messages_per_second'] / naive_results['messages_per_second']
+    speedup = buffered_results["messages_per_second"] / naive_results["messages_per_second"]
     print(f"\nSpeedup: {speedup:.2f}x")
 
     # 2. MessagePack vs JSON
@@ -286,5 +288,5 @@ def print_benchmark_results():
     print(f"Large messages: Up to 1MB supported efficiently")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print_benchmark_results()

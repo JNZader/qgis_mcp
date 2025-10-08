@@ -26,7 +26,7 @@ class TestBasicRateLimiting:
 
         # Normal operations: 30 per minute
         for i in range(20):
-            assert rate_limiter.check_rate_limit(client, 'normal') is True
+            assert rate_limiter.check_rate_limit(client, "normal") is True
 
     def test_rate_limit_exceeded_blocked(self, rate_limiter):
         """Test that requests exceeding limit are blocked"""
@@ -34,7 +34,7 @@ class TestBasicRateLimiting:
 
         # Normal operations: 30 per minute
         for i in range(35):
-            result = rate_limiter.check_rate_limit(client, 'normal')
+            result = rate_limiter.check_rate_limit(client, "normal")
             if i < 30:
                 assert result is True
             else:
@@ -48,10 +48,10 @@ class TestBasicRateLimiting:
 
         # Fill up the limit
         for i in range(30):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Next should be blocked
-        assert rate_limiter.check_rate_limit(client, 'normal') is False
+        assert rate_limiter.check_rate_limit(client, "normal") is False
 
     def test_different_clients_isolated(self, rate_limiter):
         """Test that different clients have separate limits"""
@@ -60,13 +60,13 @@ class TestBasicRateLimiting:
 
         # Fill up client1's limit
         for i in range(30):
-            rate_limiter.check_rate_limit(client1, 'normal')
+            rate_limiter.check_rate_limit(client1, "normal")
 
         # client1 should be rate limited
-        assert rate_limiter.check_rate_limit(client1, 'normal') is False
+        assert rate_limiter.check_rate_limit(client1, "normal") is False
 
         # client2 should still be allowed
-        assert rate_limiter.check_rate_limit(client2, 'normal') is True
+        assert rate_limiter.check_rate_limit(client2, "normal") is True
 
 
 class TestOperationTypes:
@@ -77,7 +77,7 @@ class TestOperationTypes:
         client = "127.0.0.1:10006"
 
         for i in range(6):
-            result = rate_limiter.check_rate_limit(client, 'authentication')
+            result = rate_limiter.check_rate_limit(client, "authentication")
             if i < 5:
                 assert result is True
             else:
@@ -88,7 +88,7 @@ class TestOperationTypes:
         client = "127.0.0.1:10007"
 
         for i in range(12):
-            result = rate_limiter.check_rate_limit(client, 'expensive')
+            result = rate_limiter.check_rate_limit(client, "expensive")
             if i < 10:
                 assert result is True
             else:
@@ -99,7 +99,7 @@ class TestOperationTypes:
         client = "127.0.0.1:10008"
 
         for i in range(35):
-            result = rate_limiter.check_rate_limit(client, 'normal')
+            result = rate_limiter.check_rate_limit(client, "normal")
             if i < 30:
                 assert result is True
             else:
@@ -110,7 +110,7 @@ class TestOperationTypes:
         client = "127.0.0.1:10009"
 
         for i in range(105):
-            result = rate_limiter.check_rate_limit(client, 'cheap')
+            result = rate_limiter.check_rate_limit(client, "cheap")
             if i < 100:
                 assert result is True
             else:
@@ -122,13 +122,13 @@ class TestOperationTypes:
 
         # Fill up normal limit
         for i in range(30):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Normal should be blocked
-        assert rate_limiter.check_rate_limit(client, 'normal') is False
+        assert rate_limiter.check_rate_limit(client, "normal") is False
 
         # But cheap operations should still be allowed
-        assert rate_limiter.check_rate_limit(client, 'cheap') is True
+        assert rate_limiter.check_rate_limit(client, "cheap") is True
 
 
 class TestFailedAuthenticationTracking:
@@ -163,7 +163,7 @@ class TestFailedAuthenticationTracking:
 
         # Should be locked out
         with pytest.raises(SecurityException, match="locked out"):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
     def test_lockout_prevents_all_operations(self, rate_limiter):
         """Test that lockout prevents all operations"""
@@ -174,7 +174,7 @@ class TestFailedAuthenticationTracking:
             rate_limiter.record_failed_auth(client)
 
         # All operation types should be blocked
-        for op_type in ['authentication', 'expensive', 'normal', 'cheap']:
+        for op_type in ["authentication", "expensive", "normal", "cheap"]:
             with pytest.raises(SecurityException, match="locked out"):
                 rate_limiter.check_rate_limit(client, op_type)
 
@@ -204,13 +204,13 @@ class TestFailedAuthenticationTracking:
 
         # Verify locked out
         with pytest.raises(SecurityException, match="locked out"):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Successful auth (might happen through admin reset)
         rate_limiter.record_successful_auth(client)
 
         # Should no longer be locked out
-        assert rate_limiter.check_rate_limit(client, 'normal') is True
+        assert rate_limiter.check_rate_limit(client, "normal") is True
 
 
 class TestExponentialBackoff:
@@ -274,7 +274,7 @@ class TestLockoutMechanism:
 
         # Should be locked out immediately
         with pytest.raises(SecurityException, match="locked out"):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
     def test_lockout_message_includes_time(self, rate_limiter):
         """Test that lockout message includes remaining time"""
@@ -286,7 +286,7 @@ class TestLockoutMechanism:
 
         # Exception should include time remaining
         with pytest.raises(SecurityException, match="Try again in .* seconds"):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
     def test_lockout_removed_after_expiration(self, rate_limiter):
         """Test that lockout is removed after expiration"""
@@ -296,7 +296,7 @@ class TestLockoutMechanism:
         rate_limiter.lockouts[client] = time.time() - 10  # 10 seconds ago
 
         # Should not be locked out
-        assert rate_limiter.check_rate_limit(client, 'normal') is True
+        assert rate_limiter.check_rate_limit(client, "normal") is True
 
         # Lockout entry should be removed
         assert client not in rate_limiter.lockouts
@@ -311,7 +311,7 @@ class TestCleanupMechanism:
 
         # Add some requests
         for i in range(10):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Manually age the requests
         key = f"{client}:normal"
@@ -319,7 +319,7 @@ class TestCleanupMechanism:
         rate_limiter.request_history[key] = [old_time] * 10
 
         # Next check should clean up old requests
-        rate_limiter.check_rate_limit(client, 'normal')
+        rate_limiter.check_rate_limit(client, "normal")
 
         # Old requests should be gone
         assert len(rate_limiter.request_history[key]) == 1  # Only the new one
@@ -329,7 +329,7 @@ class TestCleanupMechanism:
         # Add many clients
         for i in range(1500):  # More than cleanup threshold (1000)
             client = f"127.0.0.1:{20000 + i}"
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Should trigger cleanup
         # Verify cleanup happened (size should not grow unbounded)
@@ -361,7 +361,7 @@ class TestThreadSafety:
         results = []
 
         def check_limit():
-            result = rate_limiter.check_rate_limit(client, 'normal')
+            result = rate_limiter.check_rate_limit(client, "normal")
             results.append(result)
 
         # Create multiple threads
@@ -406,5 +406,5 @@ class TestThreadSafety:
         assert len(rate_limiter.failed_auth_attempts[client]) == 10
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

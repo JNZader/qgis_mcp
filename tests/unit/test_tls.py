@@ -34,22 +34,22 @@ class TestCertificateGeneration:
         tls_handler.ensure_certificates()
 
         # Should be able to read certificate
-        with open(tls_handler.cert_file, 'rb') as f:
+        with open(tls_handler.cert_file, "rb") as f:
             cert_data = f.read()
 
         assert len(cert_data) > 0
-        assert b'BEGIN CERTIFICATE' in cert_data
+        assert b"BEGIN CERTIFICATE" in cert_data
 
     def test_key_file_readable(self, tls_handler):
         """Test that key file is readable"""
         tls_handler.ensure_certificates()
 
         # Should be able to read key
-        with open(tls_handler.key_file, 'rb') as f:
+        with open(tls_handler.key_file, "rb") as f:
             key_data = f.read()
 
         assert len(key_data) > 0
-        assert b'BEGIN PRIVATE KEY' in key_data or b'BEGIN RSA PRIVATE KEY' in key_data
+        assert b"BEGIN PRIVATE KEY" in key_data or b"BEGIN RSA PRIVATE KEY" in key_data
 
     def test_key_file_permissions(self, tls_handler):
         """Test that key file has restrictive permissions"""
@@ -57,7 +57,8 @@ class TestCertificateGeneration:
 
         # Key file should be readable only by owner (0o600)
         import os
-        if os.name != 'nt':  # Unix-like systems
+
+        if os.name != "nt":  # Unix-like systems
             mode = tls_handler.key_file.stat().st_mode & 0o777
             assert mode == 0o600
 
@@ -67,7 +68,8 @@ class TestCertificateGeneration:
 
         # Cert file should be readable (0o644)
         import os
-        if os.name != 'nt':
+
+        if os.name != "nt":
             mode = tls_handler.cert_file.stat().st_mode & 0o777
             assert mode == 0o644
 
@@ -104,21 +106,21 @@ class TestCertificateInfo:
 
         info = tls_handler.get_certificate_info()
 
-        assert info['status'] == 'valid'
-        assert 'subject' in info
-        assert 'valid_from' in info
-        assert 'valid_until' in info
-        assert 'days_remaining' in info
+        assert info["status"] == "valid"
+        assert "subject" in info
+        assert "valid_from" in info
+        assert "valid_until" in info
+        assert "days_remaining" in info
 
     def test_certificate_subject(self, tls_handler):
         """Test certificate subject information"""
         tls_handler.ensure_certificates()
 
         info = tls_handler.get_certificate_info()
-        subject = info['subject']
+        subject = info["subject"]
 
-        assert subject['CN'] == 'localhost'
-        assert subject['O'] == 'QGIS MCP'
+        assert subject["CN"] == "localhost"
+        assert subject["O"] == "QGIS MCP"
 
     def test_certificate_validity_period(self, tls_handler):
         """Test certificate validity period"""
@@ -127,17 +129,17 @@ class TestCertificateInfo:
         info = tls_handler.get_certificate_info()
 
         # Should be valid for ~1 year
-        days_remaining = info['days_remaining']
+        days_remaining = info["days_remaining"]
         assert 300 < days_remaining < 400  # Roughly 1 year
 
     def test_certificate_info_nonexistent(self, temp_dir):
         """Test certificate info when no certificate exists"""
         from tls_handler import TLSHandler
 
-        handler = TLSHandler(cert_dir=temp_dir / 'nonexistent')
+        handler = TLSHandler(cert_dir=temp_dir / "nonexistent")
         info = handler.get_certificate_info()
 
-        assert info['status'] == 'no_certificate'
+        assert info["status"] == "no_certificate"
 
 
 class TestServerContext:
@@ -267,5 +269,5 @@ class TestTLSCommunication:
         assert client_sock.recv(1024) == b"Server response"
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

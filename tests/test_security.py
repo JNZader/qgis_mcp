@@ -12,7 +12,8 @@ import os
 
 # Import security modules
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent / 'qgis_mcp_plugin'))
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "qgis_mcp_plugin"))
 
 from security_improved import (
     ImprovedCodeSandbox,
@@ -20,7 +21,7 @@ from security_improved import (
     ImprovedRateLimiter,
     AuthenticationManager,
     SecureTokenStorage,
-    SecurityException
+    SecurityException,
 )
 
 
@@ -91,12 +92,12 @@ from qgis.utils import iface
         namespace = self.sandbox.create_safe_namespace()
 
         # Check that only allowed builtins are present
-        builtins = namespace['__builtins__']
-        assert 'print' in builtins
-        assert 'len' in builtins
-        assert 'eval' not in builtins
-        assert 'exec' not in builtins
-        assert 'open' not in builtins
+        builtins = namespace["__builtins__"]
+        assert "print" in builtins
+        assert "len" in builtins
+        assert "eval" not in builtins
+        assert "exec" not in builtins
+        assert "open" not in builtins
 
 
 class TestEnhancedPathValidator:
@@ -110,6 +111,7 @@ class TestEnhancedPathValidator:
     def teardown_method(self):
         """Clean up test fixtures"""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_path_traversal_blocked(self):
@@ -130,7 +132,7 @@ class TestEnhancedPathValidator:
         test_file.touch()
 
         # Should not raise exception
-        result = self.validator.validate_path(str(test_file), operation='read')
+        result = self.validator.validate_path(str(test_file), operation="read")
         assert Path(result) == test_file.resolve()
 
     def test_dangerous_extension_blocked(self):
@@ -143,7 +145,7 @@ class TestEnhancedPathValidator:
 
         for path in dangerous_paths:
             with pytest.raises(SecurityException, match="Dangerous file extension"):
-                self.validator.validate_path(path, operation='read')
+                self.validator.validate_path(path, operation="read")
 
     def test_safe_gis_extension_allowed(self):
         """Test that safe GIS extensions are allowed"""
@@ -152,14 +154,12 @@ class TestEnhancedPathValidator:
 
         # Should not raise exception
         self.validator.validate_path(
-            str(test_file),
-            operation='read',
-            allowed_extensions=['.shp', '.geojson']
+            str(test_file), operation="read", allowed_extensions=[".shp", ".geojson"]
         )
 
     def test_outside_allowed_directory_blocked(self):
         """Test that paths outside allowed directories are blocked"""
-        if os.name == 'nt':
+        if os.name == "nt":
             path = "C:\\Windows\\System32\\config"
         else:
             path = "/etc/passwd"
@@ -174,7 +174,7 @@ class TestEnhancedPathValidator:
         test_file.touch()
 
         # This should work (no traversal after decoding)
-        result = self.validator.validate_path(str(test_file), operation='read')
+        result = self.validator.validate_path(str(test_file), operation="read")
         assert Path(result) == test_file.resolve()
 
     def test_nonexistent_file_read_blocked(self):
@@ -182,14 +182,14 @@ class TestEnhancedPathValidator:
         path = str(self.temp_dir / "nonexistent.txt")
 
         with pytest.raises(SecurityException, match="does not exist"):
-            self.validator.validate_path(path, operation='read')
+            self.validator.validate_path(path, operation="read")
 
     def test_write_permission_checked(self):
         """Test that write permissions are checked"""
         test_file = self.temp_dir / "test.txt"
 
         # Should not raise exception for writable directory
-        self.validator.validate_path(str(test_file), operation='write')
+        self.validator.validate_path(str(test_file), operation="write")
 
 
 class TestImprovedRateLimiter:
@@ -205,7 +205,7 @@ class TestImprovedRateLimiter:
 
         # Should allow normal amount of requests
         for _ in range(5):
-            assert self.limiter.check_rate_limit(client_addr, 'normal') is True
+            assert self.limiter.check_rate_limit(client_addr, "normal") is True
 
     def test_rate_limit_exceeded(self):
         """Test that rate limit can be exceeded"""
@@ -213,7 +213,7 @@ class TestImprovedRateLimiter:
 
         # Try to exceed normal limit (30 per minute)
         for i in range(35):
-            result = self.limiter.check_rate_limit(client_addr, 'normal')
+            result = self.limiter.check_rate_limit(client_addr, "normal")
             if i < 30:
                 assert result is True
             else:
@@ -225,7 +225,7 @@ class TestImprovedRateLimiter:
 
         # Authentication has lower limit (5 per 15 min)
         for i in range(6):
-            result = self.limiter.check_rate_limit(client_addr, 'authentication')
+            result = self.limiter.check_rate_limit(client_addr, "authentication")
             if i < 5:
                 assert result is True
             else:
@@ -234,7 +234,7 @@ class TestImprovedRateLimiter:
         # Cheap operations have higher limit (100 per min)
         client_addr2 = "127.0.0.1:12348"
         for i in range(101):
-            result = self.limiter.check_rate_limit(client_addr2, 'cheap')
+            result = self.limiter.check_rate_limit(client_addr2, "cheap")
             if i < 100:
                 assert result is True
             else:
@@ -250,7 +250,7 @@ class TestImprovedRateLimiter:
 
         # Should be locked out
         with pytest.raises(SecurityException, match="locked out"):
-            self.limiter.check_rate_limit(client_addr, 'normal')
+            self.limiter.check_rate_limit(client_addr, "normal")
 
     def test_successful_auth_clears_failures(self):
         """Test that successful auth clears failed attempts"""
@@ -264,7 +264,7 @@ class TestImprovedRateLimiter:
         self.limiter.record_successful_auth(client_addr)
 
         # Should not be locked out
-        result = self.limiter.check_rate_limit(client_addr, 'normal')
+        result = self.limiter.check_rate_limit(client_addr, "normal")
         assert result is True
 
 
@@ -389,7 +389,7 @@ class TestSecureTokenStorage:
 
         # Read raw file content
         token_file = self.storage._get_token_path()
-        with open(token_file, 'rb') as f:
+        with open(token_file, "rb") as f:
             raw_content = f.read()
 
         # Should not contain plaintext token
@@ -412,5 +412,5 @@ class TestSecureTokenStorage:
 
 
 # Run tests
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

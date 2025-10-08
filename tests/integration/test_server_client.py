@@ -27,25 +27,20 @@ class TestBasicServerClient:
         server_sock, client_sock = socket_pair
 
         # Client sends ping
-        ping_msg = {'type': 'ping', 'id': 'msg_001'}
+        ping_msg = {"type": "ping", "id": "msg_001"}
         protocol_handler.send_message(client_sock, ping_msg)
 
         # Server receives
         received = protocol_handler.receive_message(server_sock, timeout=1.0)
-        assert received['type'] == 'ping'
+        assert received["type"] == "ping"
 
         # Server responds
-        response = {
-            'type': 'response',
-            'id': 'msg_001',
-            'success': True,
-            'data': {'pong': True}
-        }
+        response = {"type": "response", "id": "msg_001", "success": True, "data": {"pong": True}}
         protocol_handler.send_message(server_sock, response)
 
         # Client receives response
         client_response = protocol_handler.receive_message(client_sock, timeout=1.0)
-        assert client_response['success'] is True
+        assert client_response["success"] is True
 
     def test_multiple_requests(self, protocol_handler, socket_pair):
         """Test multiple requests in sequence"""
@@ -53,25 +48,20 @@ class TestBasicServerClient:
 
         for i in range(5):
             # Send request
-            msg = {'type': 'ping', 'id': f'msg_{i:03d}'}
+            msg = {"type": "ping", "id": f"msg_{i:03d}"}
             protocol_handler.send_message(client_sock, msg)
 
             # Receive on server
             received = protocol_handler.receive_message(server_sock, timeout=1.0)
-            assert received['id'] == f'msg_{i:03d}'
+            assert received["id"] == f"msg_{i:03d}"
 
             # Send response
-            response = {
-                'type': 'response',
-                'id': f'msg_{i:03d}',
-                'success': True,
-                'data': {}
-            }
+            response = {"type": "response", "id": f"msg_{i:03d}", "success": True, "data": {}}
             protocol_handler.send_message(server_sock, response)
 
             # Receive response on client
             client_resp = protocol_handler.receive_message(client_sock, timeout=1.0)
-            assert client_resp['id'] == f'msg_{i:03d}'
+            assert client_resp["id"] == f"msg_{i:03d}"
 
 
 @pytest.mark.integration
@@ -85,33 +75,29 @@ class TestAuthenticationIntegration:
         client_addr = "127.0.0.1:40001"
 
         # Client sends auth request
-        auth_msg = {
-            'type': 'authenticate',
-            'id': 'auth_001',
-            'data': {'token': token}
-        }
+        auth_msg = {"type": "authenticate", "id": "auth_001", "data": {"token": token}}
         protocol_handler.send_message(client_sock, auth_msg)
 
         # Server receives and processes
         received = protocol_handler.receive_message(server_sock, timeout=1.0)
-        assert received['type'] == 'authenticate'
+        assert received["type"] == "authenticate"
 
         # Server verifies token
-        is_valid = auth_manager.verify_token(client_addr, received['data']['token'])
+        is_valid = auth_manager.verify_token(client_addr, received["data"]["token"])
 
         # Server responds
         response = {
-            'type': 'response',
-            'id': 'auth_001',
-            'success': is_valid,
-            'data': {'authenticated': is_valid}
+            "type": "response",
+            "id": "auth_001",
+            "success": is_valid,
+            "data": {"authenticated": is_valid},
         }
         protocol_handler.send_message(server_sock, response)
 
         # Client receives response
         client_resp = protocol_handler.receive_message(client_sock, timeout=1.0)
-        assert client_resp['success'] is True
-        assert client_resp['data']['authenticated'] is True
+        assert client_resp["success"] is True
+        assert client_resp["data"]["authenticated"] is True
 
     def test_reject_unauthenticated_request(self, protocol_handler, socket_pair, auth_manager):
         """Test that unauthenticated requests are rejected"""
@@ -119,7 +105,7 @@ class TestAuthenticationIntegration:
         client_addr = "127.0.0.1:40002"
 
         # Client sends request without auth
-        msg = {'type': 'list_layers', 'id': 'msg_001'}
+        msg = {"type": "list_layers", "id": "msg_001"}
         protocol_handler.send_message(client_sock, msg)
 
         # Server receives
@@ -130,16 +116,16 @@ class TestAuthenticationIntegration:
 
         # Server responds with error
         response = {
-            'type': 'response',
-            'id': 'msg_001',
-            'success': False,
-            'error': 'Authentication required' if not is_authenticated else None
+            "type": "response",
+            "id": "msg_001",
+            "success": False,
+            "error": "Authentication required" if not is_authenticated else None,
         }
         protocol_handler.send_message(server_sock, response)
 
         # Client receives error
         client_resp = protocol_handler.receive_message(client_sock, timeout=1.0)
-        assert client_resp['success'] is False
+        assert client_resp["success"] is False
 
 
 @pytest.mark.integration
@@ -157,21 +143,16 @@ class TestRateLimitingIntegration:
         # Try to send many requests
         for i in range(40):
             # Check rate limit on server side
-            if rate_limiter.check_rate_limit(client_addr, 'normal'):
+            if rate_limiter.check_rate_limit(client_addr, "normal"):
                 successful_requests += 1
 
                 # Send success response
-                msg = {'type': 'ping', 'id': f'msg_{i:03d}'}
+                msg = {"type": "ping", "id": f"msg_{i:03d}"}
                 protocol_handler.send_message(client_sock, msg)
 
                 received = protocol_handler.receive_message(server_sock, timeout=1.0)
 
-                response = {
-                    'type': 'response',
-                    'id': f'msg_{i:03d}',
-                    'success': True,
-                    'data': {}
-                }
+                response = {"type": "response", "id": f"msg_{i:03d}", "success": True, "data": {}}
                 protocol_handler.send_message(server_sock, response)
                 protocol_handler.receive_message(client_sock, timeout=1.0)
             else:
@@ -191,7 +172,7 @@ class TestErrorHandling:
         server_sock, client_sock = socket_pair
 
         # Client sends invalid message (missing required field)
-        invalid_msg = {'id': 'msg_001'}  # Missing 'type'
+        invalid_msg = {"id": "msg_001"}  # Missing 'type'
 
         # This should fail validation
         with pytest.raises(Exception):  # ProtocolException
@@ -202,8 +183,8 @@ class TestErrorHandling:
         server_sock, client_sock = socket_pair
 
         # Create oversized message
-        huge_data = 'x' * (protocol_handler.MAX_MESSAGE_SIZE + 1)
-        msg = {'type': 'ping', 'id': 'msg_001', 'data': huge_data}
+        huge_data = "x" * (protocol_handler.MAX_MESSAGE_SIZE + 1)
+        msg = {"type": "ping", "id": "msg_001", "data": huge_data}
 
         # Should be rejected
         with pytest.raises(Exception):  # ProtocolException
@@ -235,7 +216,7 @@ class TestConcurrentClients:
         # Create server socket
         server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_sock.bind(('127.0.0.1', free_port))
+        server_sock.bind(("127.0.0.1", free_port))
         server_sock.listen(5)
 
         client_results = []
@@ -245,11 +226,11 @@ class TestConcurrentClients:
             try:
                 # Connect
                 client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_sock.connect(('127.0.0.1', free_port))
+                client_sock.connect(("127.0.0.1", free_port))
 
                 # Send message
                 handler = BufferedProtocolHandler(use_msgpack=False, validate_schema=True)
-                msg = {'type': 'ping', 'id': f'client_{client_id}'}
+                msg = {"type": "ping", "id": f"client_{client_id}"}
                 handler.send_message(client_sock, msg)
 
                 # Receive response
@@ -271,12 +252,7 @@ class TestConcurrentClients:
                 msg = handler.receive_message(conn, timeout=2.0)
 
                 # Send response
-                response = {
-                    'type': 'response',
-                    'id': msg['id'],
-                    'success': True,
-                    'data': {}
-                }
+                response = {"type": "response", "id": msg["id"], "success": True, "data": {}}
                 handler.send_message(conn, response)
                 conn.close()
 
@@ -304,7 +280,7 @@ class TestConcurrentClients:
         assert len(client_results) == 3
         for client_id, response in client_results:
             assert response is not None
-            assert response['success'] is True
+            assert response["success"] is True
 
 
 @pytest.mark.integration
@@ -331,5 +307,5 @@ class TestMessageValidation:
                 protocol_handler.send_message(client_sock, msg)
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

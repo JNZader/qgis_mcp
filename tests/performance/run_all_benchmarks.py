@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Add module path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'qgis_mcp_plugin'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))
 
 
 def run_benchmark(name: str, module_name: str):
@@ -19,13 +19,14 @@ def run_benchmark(name: str, module_name: str):
 
     try:
         module = __import__(module_name)
-        if hasattr(module, 'print_benchmark_results'):
+        if hasattr(module, "print_benchmark_results"):
             module.print_benchmark_results()
         else:
             print(f"Warning: {module_name} has no print_benchmark_results function")
     except Exception as e:
         print(f"ERROR running {name}: {e}")
         import traceback
+
         traceback.print_exc()
 
 
@@ -71,7 +72,8 @@ def main():
     print("\n" + "=" * 80)
     print("KEY FINDINGS & RECOMMENDATIONS")
     print("=" * 80)
-    print("""
+    print(
+        """
 1. PROTOCOL OPTIMIZATION
    - BufferedProtocolHandler is 5-10x faster than naive parsing
    - MessagePack is 20-30% faster than JSON for large messages
@@ -107,10 +109,11 @@ def main():
    - Memory increase: 5-20 MB for caching
    - CPU overhead: <5% when optimizations enabled
    - RECOMMENDATION: Enable all optimizations for production use
-    """)
+    """
+    )
 
     print("=" * 80)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

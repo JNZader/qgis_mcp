@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'qgis_mcp_plugin'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))
 
 
 class LoadTestClient:
@@ -35,7 +35,7 @@ class LoadTestClient:
         self.requests_sent += 1
         self.responses_received += 1
 
-        return {'status': 'success', 'latency': latency}
+        return {"status": "success", "latency": latency}
 
 
 def benchmark_realistic_workflow():
@@ -44,12 +44,12 @@ def benchmark_realistic_workflow():
     print("-" * 80)
 
     workflow_steps = [
-        ('authenticate', 0.010),        # 10ms
-        ('list_layers', 0.050),         # 50ms
-        ('get_features', 0.200),        # 200ms
-        ('get_features', 0.150),        # 150ms (cached)
-        ('execute_code', 0.500),        # 500ms
-        ('get_stats', 0.020),           # 20ms
+        ("authenticate", 0.010),  # 10ms
+        ("list_layers", 0.050),  # 50ms
+        ("get_features", 0.200),  # 200ms
+        ("get_features", 0.150),  # 150ms (cached)
+        ("execute_code", 0.500),  # 500ms
+        ("get_stats", 0.020),  # 20ms
     ]
 
     print("Workflow steps:")
@@ -74,9 +74,9 @@ def benchmark_realistic_workflow():
     print(f"  Max latency: {max(client.latencies) * 1000:.1f}ms")
 
     return {
-        'total_time': total_time,
-        'requests': client.requests_sent,
-        'avg_latency': sum(client.latencies) / len(client.latencies)
+        "total_time": total_time,
+        "requests": client.requests_sent,
+        "avg_latency": sum(client.latencies) / len(client.latencies),
     }
 
 
@@ -87,11 +87,11 @@ def benchmark_sustained_load(duration: int = 60, target_rps: int = 100):
 
     # Request type distribution (realistic)
     request_types = {
-        'ping': (0.05, 0.30),              # 30% - cheap
-        'list_layers': (0.05, 0.20),       # 20% - cheap
-        'get_features': (0.20, 0.40),      # 40% - normal
-        'execute_code': (0.50, 0.08),      # 8% - expensive
-        'get_stats': (0.02, 0.02),         # 2% - cheap
+        "ping": (0.05, 0.30),  # 30% - cheap
+        "list_layers": (0.05, 0.20),  # 20% - cheap
+        "get_features": (0.20, 0.40),  # 40% - normal
+        "execute_code": (0.50, 0.08),  # 8% - expensive
+        "get_stats": (0.02, 0.02),  # 2% - cheap
     }
 
     # Calculate request distribution
@@ -117,7 +117,7 @@ def benchmark_sustained_load(duration: int = 60, target_rps: int = 100):
         # Select request type based on distribution
         rand = random.random()
         cumulative = 0
-        selected_type = 'ping'
+        selected_type = "ping"
         selected_duration = 0.05
 
         for req_type, (req_duration, percentage) in request_types.items():
@@ -146,7 +146,9 @@ def benchmark_sustained_load(duration: int = 60, target_rps: int = 100):
             current_rps = requests_sent / elapsed
             avg_latency = sum(latencies) / len(latencies) * 1000
 
-            print(f"{elapsed:>4.0f}s   {current_rps:>5.1f}   {avg_latency:>8.1f}       {requests_sent}")
+            print(
+                f"{elapsed:>4.0f}s   {current_rps:>5.1f}   {avg_latency:>8.1f}       {requests_sent}"
+            )
             last_report = time.time()
 
         # Rate limiting
@@ -178,16 +180,16 @@ def benchmark_sustained_load(duration: int = 60, target_rps: int = 100):
         print(f"  {req_type:15}: {count:5} ({percentage:5.1f}%)")
 
     return {
-        'duration': total_time,
-        'requests': requests_sent,
-        'rps': requests_sent / total_time,
-        'errors': errors,
-        'latency': {
-            'p50': p50,
-            'p95': p95,
-            'p99': p99,
-            'avg': sum(latencies) / len(latencies) * 1000
-        }
+        "duration": total_time,
+        "requests": requests_sent,
+        "rps": requests_sent / total_time,
+        "errors": errors,
+        "latency": {
+            "p50": p50,
+            "p95": p95,
+            "p99": p99,
+            "avg": sum(latencies) / len(latencies) * 1000,
+        },
     }
 
 
@@ -233,28 +235,22 @@ def benchmark_stress_test():
         error_rate = errors / requests_sent * 100
 
         results[target_rps] = {
-            'target_rps': target_rps,
-            'actual_rps': actual_rps,
-            'avg_latency_ms': avg_latency,
-            'error_rate': error_rate,
-            'sustainable': error_rate < 1.0 and avg_latency < 500
+            "target_rps": target_rps,
+            "actual_rps": actual_rps,
+            "avg_latency_ms": avg_latency,
+            "error_rate": error_rate,
+            "sustainable": error_rate < 1.0 and avg_latency < 500,
         }
 
-        status = "OK" if results[target_rps]['sustainable'] else "DEGRADED"
+        status = "OK" if results[target_rps]["sustainable"] else "DEGRADED"
         print(f"  Actual: {actual_rps:.1f} req/s, Latency: {avg_latency:.1f}ms, Status: {status}")
 
     # Find maximum sustainable
-    max_sustainable = max(
-        (rps for rps, data in results.items() if data['sustainable']),
-        default=0
-    )
+    max_sustainable = max((rps for rps, data in results.items() if data["sustainable"]), default=0)
 
     print(f"\nMaximum sustainable throughput: {max_sustainable} req/s")
 
-    return {
-        'results': results,
-        'max_sustainable': max_sustainable
-    }
+    return {"results": results, "max_sustainable": max_sustainable}
 
 
 def benchmark_concurrent_clients(num_clients: int = 10, duration: int = 10):
@@ -271,9 +267,9 @@ def benchmark_concurrent_clients(num_clients: int = 10, duration: int = 10):
         while time.time() - start < duration:
             # Random operation
             operations = [
-                ('ping', 0.01),
-                ('list_layers', 0.05),
-                ('get_features', 0.20),
+                ("ping", 0.01),
+                ("list_layers", 0.05),
+                ("get_features", 0.20),
             ]
             op_type, op_duration = random.choice(operations)
             client.simulate_request(op_type, op_duration)
@@ -314,11 +310,11 @@ def benchmark_concurrent_clients(num_clients: int = 10, duration: int = 10):
     print(f"  Requests per client: {total_requests / num_clients:.1f}")
 
     return {
-        'num_clients': num_clients,
-        'duration': total_time,
-        'total_requests': total_requests,
-        'throughput': total_requests / total_time,
-        'avg_latency': avg_latency
+        "num_clients": num_clients,
+        "duration": total_time,
+        "total_requests": total_requests,
+        "throughput": total_requests / total_time,
+        "avg_latency": avg_latency,
     }
 
 
@@ -347,12 +343,20 @@ def print_benchmark_results():
     print(f"Workflow completion: {workflow['total_time']:.2f}s")
     print(f"Sustained throughput: {sustained['rps']:.1f} req/s")
     print(f"Max throughput: {stress['max_sustainable']} req/s")
-    print(f"Concurrent clients: {concurrent['num_clients']} clients @ {concurrent['throughput']:.1f} req/s")
+    print(
+        f"Concurrent clients: {concurrent['num_clients']} clients @ {concurrent['throughput']:.1f} req/s"
+    )
     print(f"\nLatency targets:")
-    print(f"  p50: {sustained['latency']['p50']:.1f}ms (target: <100ms) {'✓' if sustained['latency']['p50'] < 100 else '✗'}")
-    print(f"  p95: {sustained['latency']['p95']:.1f}ms (target: <500ms) {'✓' if sustained['latency']['p95'] < 500 else '✗'}")
-    print(f"  p99: {sustained['latency']['p99']:.1f}ms (target: <1000ms) {'✓' if sustained['latency']['p99'] < 1000 else '✗'}")
+    print(
+        f"  p50: {sustained['latency']['p50']:.1f}ms (target: <100ms) {'✓' if sustained['latency']['p50'] < 100 else '✗'}"
+    )
+    print(
+        f"  p95: {sustained['latency']['p95']:.1f}ms (target: <500ms) {'✓' if sustained['latency']['p95'] < 500 else '✗'}"
+    )
+    print(
+        f"  p99: {sustained['latency']['p99']:.1f}ms (target: <1000ms) {'✓' if sustained['latency']['p99'] < 1000 else '✗'}"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print_benchmark_results()

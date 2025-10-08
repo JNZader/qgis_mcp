@@ -14,7 +14,7 @@ from unittest.mock import Mock, MagicMock
 import sys
 
 # Add plugin to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'qgis_mcp_plugin'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "qgis_mcp_plugin"))
 
 from security_improved import (
     ImprovedCodeSandbox,
@@ -31,6 +31,7 @@ from tls_handler import TLSHandler
 # Mock QGIS Components
 # ============================================================================
 
+
 class MockQgsMessageLog:
     """Mock QGIS message log"""
 
@@ -41,6 +42,7 @@ class MockQgsMessageLog:
 
 class MockQgis:
     """Mock QGIS constants"""
+
     Info = 0
     Warning = 1
     Critical = 2
@@ -128,6 +130,7 @@ _mock_project_instance = MockQgsProject()
 # Fixtures: File System
 # ============================================================================
 
+
 @pytest.fixture
 def temp_dir():
     """Create a temporary directory for testing"""
@@ -160,6 +163,7 @@ def allowed_directories(temp_dir):
 # ============================================================================
 # Fixtures: Security Components
 # ============================================================================
+
 
 @pytest.fixture
 def sandbox():
@@ -207,6 +211,7 @@ def token_storage():
 # Fixtures: Protocol Handlers
 # ============================================================================
 
+
 @pytest.fixture
 def protocol_handler():
     """Create a protocol handler instance"""
@@ -224,6 +229,7 @@ def msgpack_protocol():
     """Create a MessagePack protocol handler if available"""
     try:
         import msgpack
+
         return ProtocolHandler(use_msgpack=True, validate_schema=True)
     except ImportError:
         pytest.skip("msgpack not available")
@@ -233,11 +239,12 @@ def msgpack_protocol():
 # Fixtures: TLS/SSL
 # ============================================================================
 
+
 @pytest.fixture
 def tls_handler(temp_dir):
     """Create a TLS handler instance"""
     try:
-        handler = TLSHandler(cert_dir=temp_dir / 'certs')
+        handler = TLSHandler(cert_dir=temp_dir / "certs")
         return handler
     except ImportError:
         pytest.skip("PyOpenSSL not available")
@@ -249,7 +256,7 @@ def tls_socket_pair(tls_handler):
     # Create server socket
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_sock.bind(('127.0.0.1', 0))
+    server_sock.bind(("127.0.0.1", 0))
     server_sock.listen(1)
 
     port = server_sock.getsockname()[1]
@@ -258,7 +265,7 @@ def tls_socket_pair(tls_handler):
     client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect_client():
-        client_sock.connect(('127.0.0.1', port))
+        client_sock.connect(("127.0.0.1", port))
 
     client_thread = threading.Thread(target=connect_client)
     client_thread.start()
@@ -283,13 +290,14 @@ def tls_socket_pair(tls_handler):
 # Fixtures: Network
 # ============================================================================
 
+
 @pytest.fixture
 def socket_pair():
     """Create a pair of connected sockets for testing"""
     # Create server socket
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_sock.bind(('127.0.0.1', 0))
+    server_sock.bind(("127.0.0.1", 0))
     server_sock.listen(1)
 
     port = server_sock.getsockname()[1]
@@ -299,7 +307,7 @@ def socket_pair():
 
     # Connect in background thread
     def connect_client():
-        client_sock.connect(('127.0.0.1', port))
+        client_sock.connect(("127.0.0.1", port))
 
     client_thread = threading.Thread(target=connect_client)
     client_thread.start()
@@ -320,7 +328,7 @@ def socket_pair():
 def free_port():
     """Get a free port for testing"""
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind(('127.0.0.1', 0))
+    sock.bind(("127.0.0.1", 0))
     port = sock.getsockname()[1]
     sock.close()
     return port
@@ -329,6 +337,7 @@ def free_port():
 # ============================================================================
 # Fixtures: Mock QGIS Environment
 # ============================================================================
+
 
 @pytest.fixture
 def mock_qgis(monkeypatch):
@@ -344,20 +353,17 @@ def mock_qgis(monkeypatch):
     mock_qgis_utils.iface = MagicMock()
 
     # Patch sys.modules
-    monkeypatch.setitem(sys.modules, 'qgis', MagicMock())
-    monkeypatch.setitem(sys.modules, 'qgis.core', mock_qgis_core)
-    monkeypatch.setitem(sys.modules, 'qgis.utils', mock_qgis_utils)
+    monkeypatch.setitem(sys.modules, "qgis", MagicMock())
+    monkeypatch.setitem(sys.modules, "qgis.core", mock_qgis_core)
+    monkeypatch.setitem(sys.modules, "qgis.utils", mock_qgis_utils)
 
-    return {
-        'core': mock_qgis_core,
-        'utils': mock_qgis_utils,
-        'project': _mock_project_instance
-    }
+    return {"core": mock_qgis_core, "utils": mock_qgis_utils, "project": _mock_project_instance}
 
 
 # ============================================================================
 # Fixtures: Test Data
 # ============================================================================
+
 
 @pytest.fixture
 def valid_python_code():
@@ -378,19 +384,15 @@ def malicious_python_codes():
         "import os; os.system('rm -rf /')",
         "import subprocess; subprocess.run(['ls'])",
         "__import__('os').system('whoami')",
-
         # Eval/exec attacks
-        "eval('__import__(\"os\").system(\"ls\")')",
+        'eval(\'__import__("os").system("ls")\')',
         "exec('import os; os.system(\"pwd\")')",
-
         # File access
         "open('/etc/passwd').read()",
         "open('C:\\\\Windows\\\\System32\\\\config\\\\SAM').read()",
-
         # Attribute access
         "[].__class__.__bases__[0].__subclasses__()",
         "().__class__.__bases__[0].__subclasses__()[104].__init__.__globals__['sys']",
-
         # Function access
         "getattr(__builtins__, 'eval')('1+1')",
         "vars()['__builtins__']['exec']('import os')",
@@ -443,32 +445,15 @@ def safe_gis_paths(temp_dir):
 # Fixtures: Message Data
 # ============================================================================
 
+
 @pytest.fixture
 def valid_messages():
     """Sample valid protocol messages"""
     return [
-        {
-            'type': 'authenticate',
-            'id': 'msg_001',
-            'data': {'token': 'test_token_1234567890'}
-        },
-        {
-            'type': 'ping',
-            'id': 'msg_002'
-        },
-        {
-            'type': 'list_layers',
-            'id': 'msg_003',
-            'data': {'offset': 0, 'limit': 10}
-        },
-        {
-            'type': 'get_features',
-            'id': 'msg_004',
-            'data': {
-                'layer_id': 'layer_123',
-                'limit': 100
-            }
-        },
+        {"type": "authenticate", "id": "msg_001", "data": {"token": "test_token_1234567890"}},
+        {"type": "ping", "id": "msg_002"},
+        {"type": "list_layers", "id": "msg_003", "data": {"offset": 0, "limit": 10}},
+        {"type": "get_features", "id": "msg_004", "data": {"layer_id": "layer_123", "limit": 100}},
     ]
 
 
@@ -477,23 +462,19 @@ def invalid_messages():
     """Sample invalid protocol messages"""
     return [
         # Missing required fields
-        {'type': 'ping'},  # Missing id
-        {'id': 'msg_001'},  # Missing type
-
+        {"type": "ping"},  # Missing id
+        {"id": "msg_001"},  # Missing type
         # Invalid field values
-        {'type': '', 'id': 'msg_001'},  # Empty type
-        {'type': 'x' * 100, 'id': 'msg_001'},  # Type too long
-
+        {"type": "", "id": "msg_001"},  # Empty type
+        {"type": "x" * 100, "id": "msg_001"},  # Type too long
         # Invalid data
-        {'type': 'authenticate', 'id': 'msg_001', 'data': {}},  # Missing token
-        {'type': 'authenticate', 'id': 'msg_001', 'data': {'token': 'short'}},  # Token too short
-
+        {"type": "authenticate", "id": "msg_001", "data": {}},  # Missing token
+        {"type": "authenticate", "id": "msg_001", "data": {"token": "short"}},  # Token too short
         # Additional properties
-        {'type': 'ping', 'id': 'msg_001', 'extra': 'not_allowed'},
-
+        {"type": "ping", "id": "msg_001", "extra": "not_allowed"},
         # Wrong types
-        {'type': 123, 'id': 'msg_001'},  # Type not string
-        {'type': 'ping', 'id': ['not', 'string']},  # ID wrong type
+        {"type": 123, "id": "msg_001"},  # Type not string
+        {"type": "ping", "id": ["not", "string"]},  # ID wrong type
     ]
 
 
@@ -501,9 +482,11 @@ def invalid_messages():
 # Fixtures: Performance
 # ============================================================================
 
+
 @pytest.fixture
 def performance_timer():
     """Timer for performance measurements"""
+
     class Timer:
         def __init__(self):
             self.start_time = None
@@ -532,9 +515,11 @@ def performance_timer():
 # Utility Functions
 # ============================================================================
 
+
 @pytest.fixture
 def assert_secure_timing():
     """Fixture to assert constant-time operations (timing attack resistance)"""
+
     def _assert(func1, func2, max_ratio=2.0, iterations=100):
         """
         Assert that two functions have similar execution times
@@ -571,21 +556,16 @@ def assert_secure_timing():
 # Hooks
 # ============================================================================
 
+
 def pytest_configure(config):
     """Configure pytest"""
     # Add custom markers
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
     )
-    config.addinivalue_line(
-        "markers", "security: marks tests as security-related"
-    )
-    config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "requires_qgis: marks tests that require QGIS installation"
-    )
+    config.addinivalue_line("markers", "security: marks tests as security-related")
+    config.addinivalue_line("markers", "integration: marks tests as integration tests")
+    config.addinivalue_line("markers", "requires_qgis: marks tests that require QGIS installation")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -595,6 +575,7 @@ def pytest_collection_modifyitems(config, items):
 
     try:
         import qgis
+
         has_qgis = True
     except ImportError:
         has_qgis = False

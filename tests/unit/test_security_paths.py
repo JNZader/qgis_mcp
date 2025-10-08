@@ -28,7 +28,7 @@ class TestBasicPathValidation:
 
     def test_valid_path_within_allowed_dir(self, path_validator, temp_file):
         """Test that valid paths within allowed directories pass"""
-        result = path_validator.validate_path(str(temp_file), operation='read')
+        result = path_validator.validate_path(str(temp_file), operation="read")
         assert Path(result) == temp_file.resolve()
 
     def test_valid_relative_path(self, path_validator, temp_file):
@@ -38,20 +38,20 @@ class TestBasicPathValidation:
         relative = Path(os.path.relpath(temp_file, Path.cwd()))
 
         # Should resolve to absolute path
-        result = path_validator.validate_path(str(relative), operation='read')
+        result = path_validator.validate_path(str(relative), operation="read")
         assert Path(result).resolve() == temp_file.resolve()
 
     def test_path_normalization(self, path_validator, temp_file):
         """Test that paths are normalized"""
         # Add redundant path components
-        redundant_path = str(temp_file.parent / '.' / temp_file.name)
+        redundant_path = str(temp_file.parent / "." / temp_file.name)
 
-        result = path_validator.validate_path(redundant_path, operation='read')
+        result = path_validator.validate_path(redundant_path, operation="read")
         assert Path(result) == temp_file.resolve()
 
     def test_canonical_path_returned(self, path_validator, temp_file):
         """Test that canonical absolute path is returned"""
-        result = path_validator.validate_path(str(temp_file), operation='read')
+        result = path_validator.validate_path(str(temp_file), operation="read")
 
         result_path = Path(result)
         assert result_path.is_absolute()
@@ -126,7 +126,7 @@ class TestURLEncodingBypass:
         encoded_path = str(temp_file.parent / encoded_name)
 
         # Should work after decoding
-        result = path_validator.validate_path(encoded_path, operation='read')
+        result = path_validator.validate_path(encoded_path, operation="read")
         assert Path(result) == temp_file.resolve()
 
 
@@ -154,20 +154,20 @@ class TestUnicodeNormalization:
 class TestWindowsSpecificAttacks:
     """Test Windows-specific attack prevention"""
 
-    @pytest.mark.skipif(os.name != 'nt', reason="Windows-specific test")
+    @pytest.mark.skipif(os.name != "nt", reason="Windows-specific test")
     def test_unc_path_blocked(self, path_validator):
         """Test that UNC paths are blocked"""
         with pytest.raises(SecurityException, match="UNC paths not allowed"):
             path_validator.validate_path("\\\\server\\share\\file.txt")
 
-    @pytest.mark.skipif(os.name != 'nt', reason="Windows-specific test")
+    @pytest.mark.skipif(os.name != "nt", reason="Windows-specific test")
     def test_alternate_data_stream_blocked(self, path_validator, temp_file):
         """Test that Windows alternate data streams are blocked"""
         ads_path = f"{temp_file}:hidden:$DATA"
         with pytest.raises(SecurityException, match="alternate data streams"):
             path_validator.validate_path(ads_path)
 
-    @pytest.mark.skipif(os.name != 'nt', reason="Windows-specific test")
+    @pytest.mark.skipif(os.name != "nt", reason="Windows-specific test")
     def test_device_path_blocked(self, path_validator):
         """Test that Windows device paths are blocked"""
         # Windows device paths like CON, PRN, AUX, NUL
@@ -183,12 +183,12 @@ class TestAllowedDirectoryRestriction:
 
     def test_path_within_allowed_dir(self, path_validator, temp_file):
         """Test that paths within allowed directories are accepted"""
-        result = path_validator.validate_path(str(temp_file), operation='read')
+        result = path_validator.validate_path(str(temp_file), operation="read")
         assert result is not None
 
     def test_path_outside_allowed_dirs_blocked(self, path_validator):
         """Test that paths outside allowed directories are blocked"""
-        if os.name == 'nt':
+        if os.name == "nt":
             outside_path = "C:\\Windows\\System32\\config\\SAM"
         else:
             outside_path = "/etc/shadow"
@@ -198,7 +198,7 @@ class TestAllowedDirectoryRestriction:
 
     def test_absolute_path_outside_blocked(self, path_validator):
         """Test that absolute paths outside allowed dirs are blocked"""
-        if os.name == 'nt':
+        if os.name == "nt":
             path = "C:\\Windows\\System32"
         else:
             path = "/root/.ssh/id_rsa"
@@ -211,9 +211,7 @@ class TestAllowedDirectoryRestriction:
         temp_dir2 = Path(tempfile.mkdtemp())
 
         try:
-            validator = EnhancedPathValidator(
-                allowed_directories=[temp_dir, temp_dir2]
-            )
+            validator = EnhancedPathValidator(allowed_directories=[temp_dir, temp_dir2])
 
             # Create files in both directories
             file1 = temp_dir / "file1.txt"
@@ -222,11 +220,12 @@ class TestAllowedDirectoryRestriction:
             file2.touch()
 
             # Both should be allowed
-            validator.validate_path(str(file1), operation='read')
-            validator.validate_path(str(file2), operation='read')
+            validator.validate_path(str(file1), operation="read")
+            validator.validate_path(str(file2), operation="read")
 
         finally:
             import shutil
+
             shutil.rmtree(temp_dir2, ignore_errors=True)
 
     def test_subdir_of_allowed_dir(self, path_validator, temp_dir):
@@ -237,7 +236,7 @@ class TestAllowedDirectoryRestriction:
         test_file = subdir / "test.txt"
         test_file.touch()
 
-        result = path_validator.validate_path(str(test_file), operation='read')
+        result = path_validator.validate_path(str(test_file), operation="read")
         assert Path(result) == test_file.resolve()
 
 
@@ -286,7 +285,7 @@ class TestSafeGISExtensions:
         shp_file = temp_dir / "data.shp"
         shp_file.touch()
 
-        result = path_validator.validate_path(str(shp_file), operation='read')
+        result = path_validator.validate_path(str(shp_file), operation="read")
         assert result is not None
 
     def test_geojson_extension_allowed(self, path_validator, temp_dir):
@@ -294,13 +293,13 @@ class TestSafeGISExtensions:
         geojson_file = temp_dir / "features.geojson"
         geojson_file.touch()
 
-        result = path_validator.validate_path(str(geojson_file), operation='read')
+        result = path_validator.validate_path(str(geojson_file), operation="read")
         assert result is not None
 
     def test_all_safe_gis_extensions(self, path_validator, safe_gis_paths):
         """Test all safe GIS extensions are allowed"""
         for gis_path in safe_gis_paths:
-            result = path_validator.validate_path(str(gis_path), operation='read')
+            result = path_validator.validate_path(str(gis_path), operation="read")
             assert result is not None
 
     def test_custom_allowed_extensions(self, path_validator, temp_dir):
@@ -311,9 +310,7 @@ class TestSafeGISExtensions:
         # Without custom extensions, should fail (not in default safe list)
         # With custom extensions, should pass
         result = path_validator.validate_path(
-            str(test_file),
-            operation='read',
-            allowed_extensions=['.xyz', '.abc']
+            str(test_file), operation="read", allowed_extensions=[".xyz", ".abc"]
         )
         assert result is not None
 
@@ -324,9 +321,7 @@ class TestSafeGISExtensions:
 
         with pytest.raises(SecurityException, match="not allowed"):
             path_validator.validate_path(
-                str(test_file),
-                operation='read',
-                allowed_extensions=['.shp', '.geojson']
+                str(test_file), operation="read", allowed_extensions=[".shp", ".geojson"]
             )
 
 
@@ -338,14 +333,14 @@ class TestFileOperations:
         nonexistent = temp_dir / "nonexistent.txt"
 
         with pytest.raises(SecurityException, match="does not exist"):
-            path_validator.validate_path(str(nonexistent), operation='read')
+            path_validator.validate_path(str(nonexistent), operation="read")
 
     def test_write_operation_allows_nonexistent(self, path_validator, temp_dir):
         """Test that write operation allows non-existent files"""
         new_file = temp_dir / "new_file.txt"
 
         # Should not raise (file doesn't need to exist for write)
-        result = path_validator.validate_path(str(new_file), operation='write')
+        result = path_validator.validate_path(str(new_file), operation="write")
         assert result is not None
 
     def test_write_to_readonly_file_blocked(self, path_validator, temp_dir):
@@ -358,7 +353,7 @@ class TestFileOperations:
 
         try:
             with pytest.raises(SecurityException, match="No write permission"):
-                path_validator.validate_path(str(readonly_file), operation='write')
+                path_validator.validate_path(str(readonly_file), operation="write")
         finally:
             # Restore permissions for cleanup
             readonly_file.chmod(0o644)
@@ -369,10 +364,10 @@ class TestPermissionChecks:
 
     def test_read_permission_checked(self, path_validator, temp_file):
         """Test that read permissions are checked"""
-        result = path_validator.validate_path(str(temp_file), operation='read')
+        result = path_validator.validate_path(str(temp_file), operation="read")
         assert result is not None
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Unix permissions test")
+    @pytest.mark.skipif(os.name == "nt", reason="Unix permissions test")
     def test_no_read_permission_blocked(self, path_validator, temp_dir):
         """Test that files without read permission are blocked"""
         no_read_file = temp_dir / "no_read.txt"
@@ -381,7 +376,7 @@ class TestPermissionChecks:
 
         try:
             with pytest.raises(SecurityException, match="No read permission"):
-                path_validator.validate_path(str(no_read_file), operation='read')
+                path_validator.validate_path(str(no_read_file), operation="read")
         finally:
             # Restore permissions for cleanup
             no_read_file.chmod(0o644)
@@ -391,14 +386,14 @@ class TestPermissionChecks:
         new_file = temp_dir / "new_file.txt"
 
         # Parent directory should be writable
-        result = path_validator.validate_path(str(new_file), operation='write')
+        result = path_validator.validate_path(str(new_file), operation="write")
         assert result is not None
 
 
 class TestSymlinkHandling:
     """Test symlink attack prevention"""
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlink test requires Unix-like OS")
+    @pytest.mark.skipif(os.name == "nt", reason="Symlink test requires Unix-like OS")
     def test_symlink_resolved(self, path_validator, temp_dir):
         """Test that symlinks are resolved to real paths"""
         # Create real file
@@ -410,12 +405,12 @@ class TestSymlinkHandling:
         link_file.symlink_to(real_file)
 
         # Validate symlink
-        result = path_validator.validate_path(str(link_file), operation='read')
+        result = path_validator.validate_path(str(link_file), operation="read")
 
         # Should resolve to real file
         assert Path(result) == real_file.resolve()
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlink test requires Unix-like OS")
+    @pytest.mark.skipif(os.name == "nt", reason="Symlink test requires Unix-like OS")
     def test_symlink_outside_allowed_blocked(self, path_validator, temp_dir):
         """Test that symlinks pointing outside allowed dirs are blocked"""
         # Create symlink to /etc/passwd
@@ -426,7 +421,7 @@ class TestSymlinkHandling:
 
             # Should be blocked because it resolves outside allowed directories
             with pytest.raises(SecurityException, match="outside allowed directories"):
-                path_validator.validate_path(str(link_file), operation='read')
+                path_validator.validate_path(str(link_file), operation="read")
         except OSError:
             # Symlink creation might fail, skip test
             pytest.skip("Could not create symlink")
@@ -442,7 +437,7 @@ class TestEdgeCases:
 
     def test_root_path_rejected(self, path_validator):
         """Test that root path is rejected (unless in allowed dirs)"""
-        if os.name == 'nt':
+        if os.name == "nt":
             root = "C:\\"
         else:
             root = "/"
@@ -464,7 +459,7 @@ class TestEdgeCases:
             test_file = long_path / "test.txt"
             test_file.touch()
 
-            result = path_validator.validate_path(str(test_file), operation='read')
+            result = path_validator.validate_path(str(test_file), operation="read")
             assert result is not None
         except OSError:
             pytest.skip("Filesystem doesn't support this path length")
@@ -474,7 +469,7 @@ class TestEdgeCases:
         spaced_file = temp_dir / "file with spaces.txt"
         spaced_file.touch()
 
-        result = path_validator.validate_path(str(spaced_file), operation='read')
+        result = path_validator.validate_path(str(spaced_file), operation="read")
         assert Path(result) == spaced_file.resolve()
 
     def test_path_with_special_chars(self, path_validator, temp_dir):
@@ -482,9 +477,9 @@ class TestEdgeCases:
         special_file = temp_dir / "file@#$%.txt"
         special_file.touch()
 
-        result = path_validator.validate_path(str(special_file), operation='read')
+        result = path_validator.validate_path(str(special_file), operation="read")
         assert Path(result) == special_file.resolve()
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

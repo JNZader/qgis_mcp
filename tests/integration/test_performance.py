@@ -23,13 +23,13 @@ class TestSerializationPerformance:
     def test_json_serialization_speed(self, protocol_handler, performance_timer):
         """Benchmark JSON serialization speed"""
         message = {
-            'type': 'get_features',
-            'id': 'msg_001',
-            'data': {
-                'layer_id': 'layer_123',
-                'limit': 100,
-                'bbox': {'xmin': 0, 'ymin': 0, 'xmax': 10, 'ymax': 10}
-            }
+            "type": "get_features",
+            "id": "msg_001",
+            "data": {
+                "layer_id": "layer_123",
+                "limit": 100,
+                "bbox": {"xmin": 0, "ymin": 0, "xmax": 10, "ymax": 10},
+            },
         }
 
         iterations = 10000
@@ -48,13 +48,13 @@ class TestSerializationPerformance:
     def test_msgpack_serialization_speed(self, msgpack_protocol, performance_timer):
         """Benchmark MessagePack serialization speed"""
         message = {
-            'type': 'get_features',
-            'id': 'msg_001',
-            'data': {
-                'layer_id': 'layer_123',
-                'limit': 100,
-                'bbox': {'xmin': 0, 'ymin': 0, 'xmax': 10, 'ymax': 10}
-            }
+            "type": "get_features",
+            "id": "msg_001",
+            "data": {
+                "layer_id": "layer_123",
+                "limit": 100,
+                "bbox": {"xmin": 0, "ymin": 0, "xmax": 10, "ymax": 10},
+            },
         }
 
         iterations = 10000
@@ -82,7 +82,7 @@ class TestRateLimiterPerformance:
 
         with performance_timer:
             for _ in range(iterations):
-                rate_limiter.check_rate_limit(client, 'cheap')
+                rate_limiter.check_rate_limit(client, "cheap")
 
         elapsed = performance_timer.elapsed
         ops_per_sec = iterations / elapsed
@@ -101,7 +101,7 @@ class TestRateLimiterPerformance:
 
         for i in range(num_clients):
             client = f"127.0.0.1:{50000 + i}"
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Should have stored data for all clients
         assert len(rate_limiter.request_history) <= num_clients * 4  # 4 operation types
@@ -118,7 +118,7 @@ class TestPathValidatorPerformance:
 
         with performance_timer:
             for _ in range(iterations):
-                path_validator.validate_path(path, operation='read')
+                path_validator.validate_path(path, operation="read")
 
         elapsed = performance_timer.elapsed
         ops_per_sec = iterations / elapsed
@@ -188,7 +188,7 @@ class TestConcurrentPerformance:
             client = f"127.0.0.1:{51000 + thread_id}"
             count = 0
             for _ in range(checks_per_thread):
-                if rate_limiter.check_rate_limit(client, 'cheap'):
+                if rate_limiter.check_rate_limit(client, "cheap"):
                     count += 1
             results.append(count)
 
@@ -245,7 +245,7 @@ class TestProtocolPerformance:
 
     def test_message_packing_speed(self, protocol_handler, performance_timer):
         """Benchmark message packing speed"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
         iterations = 10000
 
         with performance_timer:
@@ -263,10 +263,10 @@ class TestProtocolPerformance:
         from protocol import ProtocolHandler
 
         handler = ProtocolHandler(use_msgpack=False, validate_schema=True)
-        messages = [{'type': 'ping', 'id': f'msg_{i:05d}'} for i in range(100)]
+        messages = [{"type": "ping", "id": f"msg_{i:05d}"} for i in range(100)]
 
         # Pack all messages
-        packed_data = b''.join(handler.pack_message(msg) for msg in messages)
+        packed_data = b"".join(handler.pack_message(msg) for msg in messages)
 
         iterations = 100
 
@@ -294,7 +294,7 @@ class TestMemoryEfficiency:
         # Add many clients
         for i in range(2000):
             client = f"127.0.0.1:{60000 + i}"
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Should trigger cleanup at 1000+ clients
         # Verify size is bounded
@@ -307,7 +307,7 @@ class TestMemoryEfficiency:
         num_chunks = 100
 
         for _ in range(num_chunks):
-            data = b'x' * chunk_size
+            data = b"x" * chunk_size
             buffered_protocol.feed_data(data)
 
             # Clear periodically to prevent overflow
@@ -318,5 +318,5 @@ class TestMemoryEfficiency:
         assert buffered_protocol.get_buffer_size() < buffered_protocol.MAX_MESSAGE_SIZE
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v', '-s'])  # -s to show print output
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "-s"])  # -s to show print output

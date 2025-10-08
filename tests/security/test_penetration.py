@@ -105,7 +105,7 @@ class TestPathTraversalAttacks:
         import os
         from security_improved import SecurityException
 
-        if os.name == 'nt':
+        if os.name == "nt":
             pytest.skip("Symlink test for Unix-like systems")
 
         # Try to create symlink to sensitive file
@@ -199,7 +199,7 @@ class TestAuthenticationBypassAttempts:
             token + "extra",  # Too long
             token[:-5],  # Too short
             token * 2,  # Doubled
-            token[:len(token)//2],  # Half
+            token[: len(token) // 2],  # Half
         ]
 
         for attempt in attempts:
@@ -218,7 +218,7 @@ class TestRateLimitBypassAttempts:
 
         for port in range(71001, 71011):
             client = f"{base_ip}:{port}"
-            result = rate_limiter.check_rate_limit(client, 'normal')
+            result = rate_limiter.check_rate_limit(client, "normal")
             # Each should be allowed (they're different clients)
             assert result is True
 
@@ -231,13 +231,13 @@ class TestRateLimitBypassAttempts:
 
         # Fill up the limit
         for _ in range(30):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
         # Should be rate limited
-        assert rate_limiter.check_rate_limit(client, 'normal') is False
+        assert rate_limiter.check_rate_limit(client, "normal") is False
 
         # Trying with "different" IP (but same client identifier) won't help
-        assert rate_limiter.check_rate_limit(client, 'normal') is False
+        assert rate_limiter.check_rate_limit(client, "normal") is False
 
     def test_lockout_cannot_be_bypassed(self, rate_limiter):
         """Test that lockout cannot be bypassed"""
@@ -250,7 +250,7 @@ class TestRateLimitBypassAttempts:
             rate_limiter.record_failed_auth(client)
 
         # Should be locked out for all operation types
-        for op_type in ['authentication', 'expensive', 'normal', 'cheap']:
+        for op_type in ["authentication", "expensive", "normal", "cheap"]:
             with pytest.raises(SecurityException, match="locked out"):
                 rate_limiter.check_rate_limit(client, op_type)
 
@@ -265,7 +265,7 @@ class TestBufferOverflowAttacks:
 
         # Try to create oversized message
         huge_data = "x" * (protocol_handler.MAX_MESSAGE_SIZE + 1)
-        message = {'type': 'ping', 'id': 'msg_001', 'data': huge_data}
+        message = {"type": "ping", "id": "msg_001", "data": huge_data}
 
         with pytest.raises(ProtocolException, match="too large"):
             protocol_handler.pack_message(message)
@@ -338,10 +338,7 @@ class TestProtocolManipulation:
         import struct
 
         malformed_json = b'{"type": invalid, "id": "msg_001"}'
-        header = struct.pack(
-            buffered_protocol.MESSAGE_HEADER_FORMAT,
-            len(malformed_json)
-        )
+        header = struct.pack(buffered_protocol.MESSAGE_HEADER_FORMAT, len(malformed_json))
 
         buffered_protocol.feed_data(header + malformed_json)
 
@@ -353,10 +350,10 @@ class TestProtocolManipulation:
         from protocol import ProtocolException
 
         invalid_messages = [
-            {'type': 'ping'},  # Missing id
-            {'id': 'msg_001'},  # Missing type
-            {'type': '', 'id': 'msg_001'},  # Empty type
-            {'type': 'ping', 'id': 'msg_001', 'extra': 'field'},  # Extra field
+            {"type": "ping"},  # Missing id
+            {"id": "msg_001"},  # Missing type
+            {"type": "", "id": "msg_001"},  # Empty type
+            {"type": "ping", "id": "msg_001", "extra": "field"},  # Extra field
         ]
 
         for msg in invalid_messages:
@@ -375,7 +372,7 @@ class TestDenialOfServiceResistance:
         # Try to make very many requests very quickly
         successful = 0
         for _ in range(200):
-            if rate_limiter.check_rate_limit(client, 'cheap'):
+            if rate_limiter.check_rate_limit(client, "cheap"):
                 successful += 1
 
         # Should have hit the limit (100 for cheap operations)
@@ -393,11 +390,12 @@ class TestDenialOfServiceResistance:
 
         # Server should timeout trying to receive complete message
         from protocol import ProtocolHandler
+
         handler = ProtocolHandler()
 
         with pytest.raises((TimeoutError, socket.timeout)):
             handler.receive_message(server_sock, timeout=1.0)
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -8,7 +8,7 @@ import random
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'qgis_mcp_plugin'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))
 
 from optimization import GeometryCache, LRUCache
 
@@ -19,7 +19,7 @@ def benchmark_lru_cache(size: int = 1000, operations: int = 10000):
 
     # Warmup - fill cache
     for i in range(size):
-        cache.put(f'key_{i}', {'data': f'value_{i}' * 10})
+        cache.put(f"key_{i}", {"data": f"value_{i}" * 10})
 
     # Benchmark: mixed read/write with realistic access pattern (80% reads, 20% writes)
     start = time.time()
@@ -28,26 +28,26 @@ def benchmark_lru_cache(size: int = 1000, operations: int = 10000):
 
     for i in range(operations):
         if random.random() < 0.8:  # 80% reads
-            key = f'key_{random.randint(0, size * 2)}'  # Some keys won't exist
+            key = f"key_{random.randint(0, size * 2)}"  # Some keys won't exist
             result = cache.get(key)
             if result:
                 hits += 1
             else:
                 misses += 1
         else:  # 20% writes
-            key = f'key_{random.randint(0, size * 2)}'
-            cache.put(key, {'data': f'value_{i}' * 10})
+            key = f"key_{random.randint(0, size * 2)}"
+            cache.put(key, {"data": f"value_{i}" * 10})
 
     elapsed = time.time() - start
 
     return {
-        'operations': operations,
-        'elapsed_seconds': elapsed,
-        'ops_per_second': operations / elapsed,
-        'hits': hits,
-        'misses': misses,
-        'hit_rate': (hits / (hits + misses)) * 100 if (hits + misses) > 0 else 0,
-        'avg_latency_us': (elapsed / operations) * 1_000_000
+        "operations": operations,
+        "elapsed_seconds": elapsed,
+        "ops_per_second": operations / elapsed,
+        "hits": hits,
+        "misses": misses,
+        "hit_rate": (hits / (hits + misses)) * 100 if (hits + misses) > 0 else 0,
+        "avg_latency_us": (elapsed / operations) * 1_000_000,
     }
 
 
@@ -60,19 +60,15 @@ def benchmark_geometry_cache_hit_rate():
     # - Repeated access to same features (simulating pan/zoom)
     # - Occasional access to new features
 
-    layers = {
-        'layer1': 500,
-        'layer2': 1000,
-        'layer3': 2000
-    }
+    layers = {"layer1": 500, "layer2": 1000, "layer3": 2000}
 
     # Create mock geometry data
     def create_mock_geometry(layer_id: str, feature_id: int):
         return {
-            'type': 'Point',
-            'format': 'wkb_base64',
-            'data': 'mock_wkb_data' * 100,  # Simulate ~1KB geometry
-            'bbox': f'{feature_id}, {feature_id}, {feature_id+1}, {feature_id+1}'
+            "type": "Point",
+            "format": "wkb_base64",
+            "data": "mock_wkb_data" * 100,  # Simulate ~1KB geometry
+            "bbox": f"{feature_id}, {feature_id}, {feature_id+1}, {feature_id+1}",
         }
 
     # Scenario 1: First access (all cache misses)
@@ -140,11 +136,7 @@ def benchmark_geometry_cache_hit_rate():
     print(f"  Hit rate: {stats3['hit_rate']:.1f}%")
     print(f"  Operations/sec: {1000 / elapsed:.0f}")
 
-    return {
-        'scenario1': stats1,
-        'scenario2': stats2,
-        'scenario3': stats3
-    }
+    return {"scenario1": stats1, "scenario2": stats2, "scenario3": stats3}
 
 
 def benchmark_cache_memory_overhead():
@@ -161,21 +153,21 @@ def benchmark_cache_memory_overhead():
         # Fill cache
         for i in range(size):
             geom_data = {
-                'type': 'Point',
-                'format': 'wkb_base64',
-                'data': 'x' * 1000,  # 1KB per geometry
-                'bbox': f'{i}, {i}, {i+1}, {i+1}'
+                "type": "Point",
+                "format": "wkb_base64",
+                "data": "x" * 1000,  # 1KB per geometry
+                "bbox": f"{i}, {i}, {i+1}, {i+1}",
             }
-            cache.put_geometry('layer1', i, geom_data)
+            cache.put_geometry("layer1", i, geom_data)
 
         # Estimate memory usage (rough approximation)
         # Each entry has key + value + overhead
         estimated_mb = (size * 1.2) / 1024  # 1.2KB per entry average
 
         results[size] = {
-            'cache_size': size,
-            'estimated_memory_mb': estimated_mb,
-            'memory_per_entry_kb': 1.2
+            "cache_size": size,
+            "estimated_memory_mb": estimated_mb,
+            "memory_per_entry_kb": 1.2,
         }
 
     return results
@@ -191,20 +183,20 @@ def benchmark_cache_eviction():
 
         # Fill cache to capacity
         for i in range(size):
-            cache.put_geometry('layer1', i, {'data': f'geom_{i}'})
+            cache.put_geometry("layer1", i, {"data": f"geom_{i}"})
 
         # Now add more entries, forcing eviction
         start = time.time()
         for i in range(size, size * 2):
-            cache.put_geometry('layer1', i, {'data': f'geom_{i}'})
+            cache.put_geometry("layer1", i, {"data": f"geom_{i}"})
 
         elapsed = time.time() - start
 
         results[size] = {
-            'cache_size': size,
-            'evictions': size,
-            'elapsed_seconds': elapsed,
-            'evictions_per_second': size / elapsed
+            "cache_size": size,
+            "evictions": size,
+            "elapsed_seconds": elapsed,
+            "evictions_per_second": size / elapsed,
         }
 
     return results
@@ -217,16 +209,13 @@ def benchmark_with_without_cache():
     def expensive_operation(layer_id: str, feature_id: int):
         """Simulate expensive geometry processing"""
         time.sleep(0.001)  # 1ms per operation
-        return {
-            'type': 'Polygon',
-            'data': 'expensive_result' * 100
-        }
+        return {"type": "Polygon", "data": "expensive_result" * 100}
 
     # WITHOUT cache
     print("\nWithout cache:")
     start = time.time()
     for _ in range(iterations):
-        layer_id = f'layer_{random.randint(1, 3)}'
+        layer_id = f"layer_{random.randint(1, 3)}"
         feature_id = random.randint(1, 100)
         result = expensive_operation(layer_id, feature_id)
 
@@ -239,7 +228,7 @@ def benchmark_with_without_cache():
     start = time.time()
 
     for _ in range(iterations):
-        layer_id = f'layer_{random.randint(1, 3)}'
+        layer_id = f"layer_{random.randint(1, 3)}"
         feature_id = random.randint(1, 100)
 
         result = cache.get_geometry(layer_id, feature_id)
@@ -255,10 +244,10 @@ def benchmark_with_without_cache():
     print(f"  Speedup: {no_cache_time / cache_time:.2f}x")
 
     return {
-        'no_cache_time': no_cache_time,
-        'cache_time': cache_time,
-        'speedup': no_cache_time / cache_time,
-        'hit_rate': stats['hit_rate']
+        "no_cache_time": no_cache_time,
+        "cache_time": cache_time,
+        "speedup": no_cache_time / cache_time,
+        "hit_rate": stats["hit_rate"],
     }
 
 
@@ -314,5 +303,5 @@ def print_benchmark_results():
     print(f"Recommended cache size: 1000-5000 entries (~1-6 MB)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print_benchmark_results()

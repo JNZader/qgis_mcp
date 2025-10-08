@@ -15,12 +15,7 @@ Tests cover:
 import pytest
 import struct
 import json
-from protocol import (
-    ProtocolHandler,
-    BufferedProtocolHandler,
-    ProtocolException,
-    MESSAGE_SCHEMAS
-)
+from protocol import ProtocolHandler, BufferedProtocolHandler, ProtocolException, MESSAGE_SCHEMAS
 
 
 class TestMessageSerialization:
@@ -28,7 +23,7 @@ class TestMessageSerialization:
 
     def test_serialize_simple_message(self, protocol_handler):
         """Test serialization of simple message"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
         data = protocol_handler.serialize(message)
 
         assert isinstance(data, bytes)
@@ -36,7 +31,7 @@ class TestMessageSerialization:
 
     def test_deserialize_simple_message(self, protocol_handler):
         """Test deserialization of simple message"""
-        original = {'type': 'ping', 'id': 'msg_001'}
+        original = {"type": "ping", "id": "msg_001"}
         data = protocol_handler.serialize(original)
         result = protocol_handler.deserialize(data)
 
@@ -45,13 +40,13 @@ class TestMessageSerialization:
     def test_serialize_complex_message(self, protocol_handler):
         """Test serialization of complex message"""
         message = {
-            'type': 'get_features',
-            'id': 'msg_002',
-            'data': {
-                'layer_id': 'layer_123',
-                'limit': 100,
-                'bbox': {'xmin': 0, 'ymin': 0, 'xmax': 10, 'ymax': 10}
-            }
+            "type": "get_features",
+            "id": "msg_002",
+            "data": {
+                "layer_id": "layer_123",
+                "limit": 100,
+                "bbox": {"xmin": 0, "ymin": 0, "xmax": 10, "ymax": 10},
+            },
         }
         data = protocol_handler.serialize(message)
         result = protocol_handler.deserialize(data)
@@ -60,11 +55,7 @@ class TestMessageSerialization:
 
     def test_serialize_with_unicode(self, protocol_handler):
         """Test serialization with unicode characters"""
-        message = {
-            'type': 'ping',
-            'id': 'msg_003',
-            'data': {'text': 'Hello 世界 🌍'}
-        }
+        message = {"type": "ping", "id": "msg_003", "data": {"text": "Hello 世界 🌍"}}
         data = protocol_handler.serialize(message)
         result = protocol_handler.deserialize(data)
 
@@ -92,7 +83,7 @@ class TestMessagePack:
 
     def test_msgpack_serialization(self, msgpack_protocol):
         """Test MessagePack serialization"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
         data = msgpack_protocol.serialize(message)
         result = msgpack_protocol.deserialize(data)
 
@@ -101,9 +92,9 @@ class TestMessagePack:
     def test_msgpack_vs_json_size(self, msgpack_protocol, protocol_handler):
         """Test that MessagePack is more compact than JSON"""
         message = {
-            'type': 'get_features',
-            'id': 'msg_002',
-            'data': {'layer_id': 'layer_123', 'limit': 100}
+            "type": "get_features",
+            "id": "msg_002",
+            "data": {"layer_id": "layer_123", "limit": 100},
         }
 
         msgpack_size = len(msgpack_protocol.serialize(message))
@@ -119,69 +110,57 @@ class TestSchemaValidation:
 
     def test_valid_ping_message(self, protocol_handler):
         """Test that valid ping message passes validation"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
         protocol_handler.validate_message(message)  # Should not raise
 
     def test_valid_authenticate_message(self, protocol_handler):
         """Test that valid authenticate message passes validation"""
         message = {
-            'type': 'authenticate',
-            'id': 'msg_002',
-            'data': {'token': 'valid_token_12345678'}
+            "type": "authenticate",
+            "id": "msg_002",
+            "data": {"token": "valid_token_12345678"},
         }
         protocol_handler.validate_message(message)  # Should not raise
 
     def test_missing_type_field(self, protocol_handler):
         """Test that missing type field fails validation"""
-        message = {'id': 'msg_001'}
+        message = {"id": "msg_001"}
         with pytest.raises(ProtocolException, match="must have 'type'"):
             protocol_handler.validate_message(message)
 
     def test_missing_id_field(self, protocol_handler):
         """Test that missing id field fails validation"""
-        message = {'type': 'ping'}
+        message = {"type": "ping"}
         with pytest.raises(ProtocolException, match="must have 'id'"):
             protocol_handler.validate_message(message)
 
     def test_empty_type_field(self, protocol_handler):
         """Test that empty type field fails validation"""
-        message = {'type': '', 'id': 'msg_001'}
+        message = {"type": "", "id": "msg_001"}
         with pytest.raises(ProtocolException, match="validation failed"):
             protocol_handler.validate_message(message)
 
     def test_type_too_long(self, protocol_handler):
         """Test that overly long type field fails validation"""
-        message = {'type': 'x' * 100, 'id': 'msg_001'}
+        message = {"type": "x" * 100, "id": "msg_001"}
         with pytest.raises(ProtocolException, match="validation failed"):
             protocol_handler.validate_message(message)
 
     def test_additional_properties_blocked(self, protocol_handler):
         """Test that additional properties are blocked"""
-        message = {
-            'type': 'ping',
-            'id': 'msg_001',
-            'extra_field': 'not_allowed'
-        }
+        message = {"type": "ping", "id": "msg_001", "extra_field": "not_allowed"}
         with pytest.raises(ProtocolException, match="validation failed"):
             protocol_handler.validate_message(message)
 
     def test_authenticate_missing_token(self, protocol_handler):
         """Test that authenticate without token fails"""
-        message = {
-            'type': 'authenticate',
-            'id': 'msg_001',
-            'data': {}
-        }
+        message = {"type": "authenticate", "id": "msg_001", "data": {}}
         with pytest.raises(ProtocolException, match="validation failed"):
             protocol_handler.validate_message(message)
 
     def test_authenticate_short_token(self, protocol_handler):
         """Test that authenticate with short token fails"""
-        message = {
-            'type': 'authenticate',
-            'id': 'msg_001',
-            'data': {'token': 'short'}
-        }
+        message = {"type": "authenticate", "id": "msg_001", "data": {"token": "short"}}
         with pytest.raises(ProtocolException, match="validation failed"):
             protocol_handler.validate_message(message)
 
@@ -191,7 +170,7 @@ class TestLengthPrefixFraming:
 
     def test_pack_message(self, protocol_handler):
         """Test packing message with length prefix"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
         packed = protocol_handler.pack_message(message)
 
         # Should have header + message
@@ -200,11 +179,11 @@ class TestLengthPrefixFraming:
 
     def test_header_format(self, protocol_handler):
         """Test header format is correct"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
         packed = protocol_handler.pack_message(message)
 
         # Extract header
-        header = packed[:protocol_handler.HEADER_SIZE]
+        header = packed[: protocol_handler.HEADER_SIZE]
         message_len = struct.unpack(protocol_handler.MESSAGE_HEADER_FORMAT, header)[0]
 
         # Header should match actual message length
@@ -214,8 +193,8 @@ class TestLengthPrefixFraming:
     def test_message_too_large_blocked(self, protocol_handler):
         """Test that oversized messages are blocked"""
         # Create huge message
-        huge_data = 'x' * (protocol_handler.MAX_MESSAGE_SIZE + 1)
-        message = {'type': 'ping', 'id': 'msg_001', 'note': huge_data}
+        huge_data = "x" * (protocol_handler.MAX_MESSAGE_SIZE + 1)
+        message = {"type": "ping", "id": "msg_001", "note": huge_data}
 
         with pytest.raises(ProtocolException, match="too large"):
             protocol_handler.pack_message(message)
@@ -233,7 +212,7 @@ class TestSocketCommunication:
     def test_send_and_receive_message(self, protocol_handler, socket_pair):
         """Test sending and receiving a message"""
         server_sock, client_sock = socket_pair
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
 
         # Send from client
         protocol_handler.send_message(client_sock, message)
@@ -247,9 +226,9 @@ class TestSocketCommunication:
         """Test sending multiple messages"""
         server_sock, client_sock = socket_pair
         messages = [
-            {'type': 'ping', 'id': 'msg_001'},
-            {'type': 'ping', 'id': 'msg_002'},
-            {'type': 'ping', 'id': 'msg_003'},
+            {"type": "ping", "id": "msg_001"},
+            {"type": "ping", "id": "msg_002"},
+            {"type": "ping", "id": "msg_003"},
         ]
 
         # Send all messages
@@ -285,13 +264,13 @@ class TestSocketCommunication:
         server_sock, client_sock = socket_pair
 
         # Create large but valid message
-        large_data = 'x' * 100000  # 100KB
-        message = {'type': 'ping', 'id': 'msg_001', 'data': large_data}
+        large_data = "x" * 100000  # 100KB
+        message = {"type": "ping", "id": "msg_001", "data": large_data}
 
         protocol_handler.send_message(client_sock, message)
         received = protocol_handler.receive_message(server_sock, timeout=5.0)
 
-        assert received['data'] == large_data
+        assert received["data"] == large_data
 
 
 class TestBufferedProtocol:
@@ -299,7 +278,7 @@ class TestBufferedProtocol:
 
     def test_feed_and_read_complete_message(self, buffered_protocol):
         """Test feeding complete message and reading it"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
 
         # Pack message
         handler = ProtocolHandler(use_msgpack=False, validate_schema=True)
@@ -314,7 +293,7 @@ class TestBufferedProtocol:
 
     def test_feed_partial_message(self, buffered_protocol):
         """Test feeding partial message"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
 
         handler = ProtocolHandler(use_msgpack=False, validate_schema=True)
         packed = handler.pack_message(message)
@@ -336,14 +315,14 @@ class TestBufferedProtocol:
     def test_feed_multiple_messages(self, buffered_protocol):
         """Test feeding multiple messages at once"""
         messages = [
-            {'type': 'ping', 'id': 'msg_001'},
-            {'type': 'ping', 'id': 'msg_002'},
+            {"type": "ping", "id": "msg_001"},
+            {"type": "ping", "id": "msg_002"},
         ]
 
         handler = ProtocolHandler(use_msgpack=False, validate_schema=True)
 
         # Pack all messages
-        packed_all = b''.join(handler.pack_message(msg) for msg in messages)
+        packed_all = b"".join(handler.pack_message(msg) for msg in messages)
 
         # Feed all at once
         buffered_protocol.feed_data(packed_all)
@@ -358,14 +337,14 @@ class TestBufferedProtocol:
     def test_buffer_overflow_protection(self, buffered_protocol):
         """Test that buffer overflow is prevented"""
         # Try to feed more than max buffer size
-        huge_data = b'x' * (buffered_protocol.MAX_MESSAGE_SIZE + 1)
+        huge_data = b"x" * (buffered_protocol.MAX_MESSAGE_SIZE + 1)
 
         with pytest.raises(ProtocolException, match="Buffer overflow"):
             buffered_protocol.feed_data(huge_data)
 
     def test_clear_buffer(self, buffered_protocol):
         """Test clearing the buffer"""
-        message = {'type': 'ping', 'id': 'msg_001'}
+        message = {"type": "ping", "id": "msg_001"}
 
         handler = ProtocolHandler(use_msgpack=False, validate_schema=True)
         packed = handler.pack_message(message)
@@ -382,7 +361,7 @@ class TestBufferedProtocol:
         """Test getting buffer size"""
         assert buffered_protocol.get_buffer_size() == 0
 
-        buffered_protocol.feed_data(b'test_data')
+        buffered_protocol.feed_data(b"test_data")
         assert buffered_protocol.get_buffer_size() == 9
 
         buffered_protocol.clear_buffer()
@@ -419,10 +398,7 @@ class TestErrorHandling:
         """Test handling of corrupted message data"""
         # Create valid header but invalid JSON data
         invalid_json = b'{"type": invalid}'
-        header = struct.pack(
-            buffered_protocol.MESSAGE_HEADER_FORMAT,
-            len(invalid_json)
-        )
+        header = struct.pack(buffered_protocol.MESSAGE_HEADER_FORMAT, len(invalid_json))
 
         buffered_protocol.feed_data(header + invalid_json)
 
@@ -430,5 +406,5 @@ class TestErrorHandling:
             buffered_protocol.try_read_message()
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

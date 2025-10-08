@@ -19,4 +19,4 @@ Run individual benchmarks:
     python benchmark_end_to_end.py
 """
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

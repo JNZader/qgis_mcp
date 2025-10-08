@@ -25,8 +25,8 @@ class TestRandomInputFuzzing:
 
         # Generate random code snippets
         for _ in range(100):
-            random_code = ''.join(
-                random.choices(string.ascii_letters + string.digits + ' \n()[]{}', k=100)
+            random_code = "".join(
+                random.choices(string.ascii_letters + string.digits + " \n()[]{}", k=100)
             )
 
             # Should either pass or raise SecurityException
@@ -41,8 +41,8 @@ class TestRandomInputFuzzing:
         from security_improved import SecurityException
 
         for _ in range(100):
-            random_path = ''.join(
-                random.choices(string.ascii_letters + string.digits + '/\\.:- ', k=50)
+            random_path = "".join(
+                random.choices(string.ascii_letters + string.digits + "/\\.:- ", k=50)
             )
 
             # Should not crash
@@ -56,9 +56,7 @@ class TestRandomInputFuzzing:
         client = "127.0.0.1:80001"
 
         for _ in range(100):
-            random_token = ''.join(
-                random.choices(string.ascii_letters + string.digits, k=50)
-            )
+            random_token = "".join(random.choices(string.ascii_letters + string.digits, k=50))
 
             # Should not crash, should return False
             result = auth_manager.verify_token(client, random_token)
@@ -71,12 +69,12 @@ class TestRandomInputFuzzing:
         for _ in range(50):
             # Generate random dict
             random_msg = {
-                'type': ''.join(random.choices(string.ascii_letters, k=10)),
-                'id': ''.join(random.choices(string.ascii_letters + string.digits, k=10)),
-                'data': {
-                    'key': random.randint(0, 1000),
-                    'value': ''.join(random.choices(string.ascii_letters, k=20))
-                }
+                "type": "".join(random.choices(string.ascii_letters, k=10)),
+                "id": "".join(random.choices(string.ascii_letters + string.digits, k=10)),
+                "data": {
+                    "key": random.randint(0, 1000),
+                    "value": "".join(random.choices(string.ascii_letters, k=20)),
+                },
             }
 
             # Should either work or raise ProtocolException
@@ -120,7 +118,7 @@ class TestBoundaryValues:
 
         # Create large message
         large_data = "x" * (max_size - 1000)  # Leave room for JSON structure
-        message = {'type': 'ping', 'id': 'msg_001', 'data': large_data}
+        message = {"type": "ping", "id": "msg_001", "data": large_data}
 
         try:
             protocol_handler.pack_message(message)
@@ -129,7 +127,7 @@ class TestBoundaryValues:
 
         # Definitely too large
         huge_data = "x" * max_size
-        message = {'type': 'ping', 'id': 'msg_001', 'data': huge_data}
+        message = {"type": "ping", "id": "msg_001", "data": huge_data}
 
         with pytest.raises(ProtocolException):
             protocol_handler.pack_message(message)
@@ -141,10 +139,10 @@ class TestBoundaryValues:
         # Normal limit is 30
         # Should succeed for first 30
         for i in range(30):
-            assert rate_limiter.check_rate_limit(client, 'normal') is True
+            assert rate_limiter.check_rate_limit(client, "normal") is True
 
         # 31st should fail
-        assert rate_limiter.check_rate_limit(client, 'normal') is False
+        assert rate_limiter.check_rate_limit(client, "normal") is False
 
     def test_failed_auth_lockout_boundary(self, rate_limiter):
         """Test lockout at exact boundary"""
@@ -156,13 +154,13 @@ class TestBoundaryValues:
         for _ in range(4):
             rate_limiter.record_failed_auth(client)
 
-        assert rate_limiter.check_rate_limit(client, 'normal') is True
+        assert rate_limiter.check_rate_limit(client, "normal") is True
 
         # 5th failure - should lock out
         rate_limiter.record_failed_auth(client)
 
         with pytest.raises(SecurityException):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
 
 @pytest.mark.security
@@ -176,9 +174,9 @@ class TestTypeConfusion:
         wrong_types = [
             123,  # Integer
             12.34,  # Float
-            ['token'],  # List
-            {'token': 'value'},  # Dict
-            b'token',  # Bytes
+            ["token"],  # List
+            {"token": "value"},  # Dict
+            b"token",  # Bytes
         ]
 
         for wrong_type in wrong_types:
@@ -210,8 +208,8 @@ class TestTypeConfusion:
 
         wrong_types = [
             123,  # Integer
-            ['path', 'components'],  # List
-            b'/etc/passwd',  # Bytes
+            ["path", "components"],  # List
+            b"/etc/passwd",  # Bytes
         ]
 
         for wrong_type in wrong_types:
@@ -299,11 +297,11 @@ class TestIntegerBoundaries:
         large_ids = [
             2**31 - 1,  # Max 32-bit int
             2**63 - 1,  # Max 64-bit int
-            -2**31,  # Min 32-bit int
+            -(2**31),  # Min 32-bit int
         ]
 
         for msg_id in large_ids:
-            message = {'type': 'ping', 'id': msg_id}
+            message = {"type": "ping", "id": msg_id}
             try:
                 protocol_handler.pack_message(message)
                 # Should work (IDs are flexible)
@@ -316,7 +314,7 @@ class TestIntegerBoundaries:
 
         # Rate limiter should handle edge cases gracefully
         # This is more of a robustness test
-        assert rate_limiter.check_rate_limit(client, 'normal') is True
+        assert rate_limiter.check_rate_limit(client, "normal") is True
 
     def test_large_offset_pagination(self, rate_limiter):
         """Test large offset values"""
@@ -374,7 +372,7 @@ class TestCombinedAttacks:
 
             # Check rate limit
             try:
-                if rate_limiter.check_rate_limit(client, 'authentication'):
+                if rate_limiter.check_rate_limit(client, "authentication"):
                     result = auth_manager.verify_token(client, wrong_token)
                     if not result:
                         rate_limiter.record_failed_auth(client)
@@ -383,7 +381,7 @@ class TestCombinedAttacks:
 
         # Should eventually be locked out or rate limited
         try:
-            result = rate_limiter.check_rate_limit(client, 'authentication')
+            result = rate_limiter.check_rate_limit(client, "authentication")
             # If we get here, we're rate limited
             assert result is False or client in rate_limiter.lockouts
         except SecurityException:
@@ -391,5 +389,5 @@ class TestCombinedAttacks:
             pass
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

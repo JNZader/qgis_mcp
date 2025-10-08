@@ -7,7 +7,7 @@ import time
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'qgis_mcp_plugin'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "qgis_mcp_plugin"))
 
 
 def benchmark_feature_counts():
@@ -26,28 +26,28 @@ def benchmark_feature_counts():
         for i in range(count):
             # Simulate feature creation with attributes and geometry
             feature = {
-                'id': i,
-                'attributes': {
-                    'name': f'Feature {i}',
-                    'value': i * 10,
-                    'category': f'Cat{i % 5}',
-                    'description': f'This is feature number {i}' * 5
+                "id": i,
+                "attributes": {
+                    "name": f"Feature {i}",
+                    "value": i * 10,
+                    "category": f"Cat{i % 5}",
+                    "description": f"This is feature number {i}" * 5,
                 },
-                'geometry': {
-                    'type': 'Point',
-                    'coordinates': [i * 0.001, i * 0.001],
-                    'wkb': 'mock_wkb_data' * 50  # ~500 bytes
-                }
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [i * 0.001, i * 0.001],
+                    "wkb": "mock_wkb_data" * 50,  # ~500 bytes
+                },
             }
             features.append(feature)
 
         elapsed = time.time() - start
 
         results[count] = {
-            'count': count,
-            'elapsed_seconds': elapsed,
-            'features_per_second': count / elapsed,
-            'avg_time_ms': (elapsed / count) * 1000
+            "count": count,
+            "elapsed_seconds": elapsed,
+            "features_per_second": count / elapsed,
+            "avg_time_ms": (elapsed / count) * 1000,
         }
 
         print(f"{count:>6} features: {elapsed:.3f}s ({count/elapsed:.0f} features/sec)")
@@ -68,15 +68,10 @@ def benchmark_with_spatial_index():
     for i in range(feature_count):
         x = (i % 100) * 0.01
         y = (i // 100) * 0.01
-        features.append({
-            'id': i,
-            'x': x,
-            'y': y,
-            'geometry': f'POINT({x} {y})'
-        })
+        features.append({"id": i, "x": x, "y": y, "geometry": f"POINT({x} {y})"})
 
     # Query bbox
-    query_bbox = {'xmin': 0.2, 'ymin': 0.2, 'xmax': 0.3, 'ymax': 0.3}
+    query_bbox = {"xmin": 0.2, "ymin": 0.2, "xmax": 0.3, "ymax": 0.3}
 
     # WITHOUT spatial index (sequential scan)
     print("Without spatial index (sequential scan):")
@@ -84,8 +79,10 @@ def benchmark_with_spatial_index():
     matches_no_index = []
 
     for feature in features:
-        if (query_bbox['xmin'] <= feature['x'] <= query_bbox['xmax'] and
-            query_bbox['ymin'] <= feature['y'] <= query_bbox['ymax']):
+        if (
+            query_bbox["xmin"] <= feature["x"] <= query_bbox["xmax"]
+            and query_bbox["ymin"] <= feature["y"] <= query_bbox["ymax"]
+        ):
             matches_no_index.append(feature)
 
     no_index_time = time.time() - start
@@ -98,16 +95,19 @@ def benchmark_with_spatial_index():
     # Build spatial index (one-time cost)
     build_start = time.time()
     # Simulate R-tree build
-    spatial_index = {'features': features}  # Simplified
+    spatial_index = {"features": features}  # Simplified
     build_time = time.time() - build_start
 
     # Query with index
     start = time.time()
     # Simulate indexed query (much faster)
     matches_with_index = [
-        f for f in features
-        if (query_bbox['xmin'] <= f['x'] <= query_bbox['xmax'] and
-            query_bbox['ymin'] <= f['y'] <= query_bbox['ymax'])
+        f
+        for f in features
+        if (
+            query_bbox["xmin"] <= f["x"] <= query_bbox["xmax"]
+            and query_bbox["ymin"] <= f["y"] <= query_bbox["ymax"]
+        )
     ]
     # In reality, R-tree would prune 90% of checks
     index_time = (time.time() - start) * 0.1  # Simulate 10x speedup
@@ -118,10 +118,10 @@ def benchmark_with_spatial_index():
     print(f"  Speedup: {no_index_time / index_time:.1f}x")
 
     return {
-        'no_index_time': no_index_time,
-        'index_time': index_time,
-        'build_time': build_time,
-        'speedup': no_index_time / index_time
+        "no_index_time": no_index_time,
+        "index_time": index_time,
+        "build_time": build_time,
+        "speedup": no_index_time / index_time,
     }
 
 
@@ -139,12 +139,9 @@ def benchmark_attributes_only():
     features_with_geom = []
     for i in range(feature_count):
         feature = {
-            'id': i,
-            'attributes': {'name': f'Feature {i}', 'value': i},
-            'geometry': {
-                'type': 'Polygon',
-                'wkb': 'mock_wkb_data' * 1000  # ~10KB geometry
-            }
+            "id": i,
+            "attributes": {"name": f"Feature {i}", "value": i},
+            "geometry": {"type": "Polygon", "wkb": "mock_wkb_data" * 1000},  # ~10KB geometry
         }
         features_with_geom.append(feature)
 
@@ -157,11 +154,7 @@ def benchmark_attributes_only():
 
     features_no_geom = []
     for i in range(feature_count):
-        feature = {
-            'id': i,
-            'attributes': {'name': f'Feature {i}', 'value': i},
-            'geometry': None
-        }
+        feature = {"id": i, "attributes": {"name": f"Feature {i}", "value": i}, "geometry": None}
         features_no_geom.append(feature)
 
     no_geom_time = time.time() - start
@@ -169,9 +162,9 @@ def benchmark_attributes_only():
     print(f"  Speedup: {with_geom_time / no_geom_time:.1f}x")
 
     return {
-        'with_geometry': with_geom_time,
-        'attributes_only': no_geom_time,
-        'speedup': with_geom_time / no_geom_time
+        "with_geometry": with_geom_time,
+        "attributes_only": no_geom_time,
+        "speedup": with_geom_time / no_geom_time,
     }
 
 
@@ -200,10 +193,10 @@ def benchmark_pagination():
         elapsed = time.time() - start
 
         results[page_size] = {
-            'page_size': page_size,
-            'total_pages': pages_fetched,
-            'elapsed_seconds': elapsed,
-            'pages_per_second': pages_fetched / elapsed
+            "page_size": page_size,
+            "total_pages": pages_fetched,
+            "elapsed_seconds": elapsed,
+            "pages_per_second": pages_fetched / elapsed,
         }
 
         print(f"Page size {page_size:>4}: {elapsed:.3f}s ({pages_fetched} pages)")
@@ -216,7 +209,7 @@ def benchmark_pagination():
     print(f"  Time: {fetch_all_time:.3f}s")
 
     # Best page size (typically around 100-500)
-    best_page_size = min(results.items(), key=lambda x: x[1]['elapsed_seconds'])
+    best_page_size = min(results.items(), key=lambda x: x[1]["elapsed_seconds"])
     print(f"\nOptimal page size: {best_page_size[0]}")
 
     return results
@@ -232,14 +225,9 @@ def benchmark_filter_expression():
     # Create features
     features = []
     for i in range(feature_count):
-        features.append({
-            'id': i,
-            'attributes': {
-                'value': i,
-                'category': f'Cat{i % 5}',
-                'active': i % 2 == 0
-            }
-        })
+        features.append(
+            {"id": i, "attributes": {"value": i, "category": f"Cat{i % 5}", "active": i % 2 == 0}}
+        )
 
     # Client-side filtering (all data transferred, then filtered)
     print("Client-side filtering (fetch all, filter locally):")
@@ -249,7 +237,9 @@ def benchmark_filter_expression():
     all_features = features.copy()
 
     # Filter client-side
-    filtered = [f for f in all_features if f['attributes']['value'] > 5000 and f['attributes']['active']]
+    filtered = [
+        f for f in all_features if f["attributes"]["value"] > 5000 and f["attributes"]["active"]
+    ]
 
     client_time = time.time() - start
     print(f"  Time: {client_time:.3f}s")
@@ -260,19 +250,23 @@ def benchmark_filter_expression():
     start = time.time()
 
     # Simulate server-side filter
-    filtered = [f for f in features if f['attributes']['value'] > 5000 and f['attributes']['active']]
+    filtered = [
+        f for f in features if f["attributes"]["value"] > 5000 and f["attributes"]["active"]
+    ]
 
     server_time = time.time() - start
     print(f"  Time: {server_time:.3f}s")
     print(f"  Matches: {len(filtered)}")
-    print(f"  Data transferred: {len(filtered)}/{feature_count} ({len(filtered)/feature_count*100:.1f}%)")
+    print(
+        f"  Data transferred: {len(filtered)}/{feature_count} ({len(filtered)/feature_count*100:.1f}%)"
+    )
     print(f"  Speedup: {client_time / server_time:.1f}x")
 
     return {
-        'client_side_time': client_time,
-        'server_side_time': server_time,
-        'speedup': client_time / server_time,
-        'matches': len(filtered)
+        "client_side_time": client_time,
+        "server_side_time": server_time,
+        "speedup": client_time / server_time,
+        "matches": len(filtered),
     }
 
 
@@ -291,14 +285,11 @@ def benchmark_wkb_vs_wkt():
     for i in range(feature_count):
         # Simulate complex polygon WKT
         wkt = f"POLYGON(({i} {i}, {i+1} {i}, {i+1} {i+1}, {i} {i+1}, {i} {i}))" * 10
-        feature = {
-            'id': i,
-            'geometry': {'format': 'wkt', 'data': wkt}
-        }
+        feature = {"id": i, "geometry": {"format": "wkt", "data": wkt}}
         wkt_features.append(feature)
 
     wkt_time = time.time() - start
-    wkt_size = sum(len(str(f['geometry']['data'])) for f in wkt_features)
+    wkt_size = sum(len(str(f["geometry"]["data"])) for f in wkt_features)
     print(f"  Time: {wkt_time:.3f}s")
     print(f"  Size: {wkt_size / 1024:.1f} KB")
 
@@ -310,28 +301,26 @@ def benchmark_wkb_vs_wkt():
     for i in range(feature_count):
         # Simulate WKB (more compact)
         import base64
+
         wkb_bytes = f"{i}".encode() * 50  # Simulated binary
-        wkb_base64 = base64.b64encode(wkb_bytes).decode('ascii')
-        feature = {
-            'id': i,
-            'geometry': {'format': 'wkb_base64', 'data': wkb_base64}
-        }
+        wkb_base64 = base64.b64encode(wkb_bytes).decode("ascii")
+        feature = {"id": i, "geometry": {"format": "wkb_base64", "data": wkb_base64}}
         wkb_features.append(feature)
 
     wkb_time = time.time() - start
-    wkb_size = sum(len(f['geometry']['data']) for f in wkb_features)
+    wkb_size = sum(len(f["geometry"]["data"]) for f in wkb_features)
     print(f"  Time: {wkb_time:.3f}s")
     print(f"  Size: {wkb_size / 1024:.1f} KB")
     print(f"  Size reduction: {(1 - wkb_size/wkt_size)*100:.1f}%")
     print(f"  Speedup: {wkt_time / wkb_time:.1f}x")
 
     return {
-        'wkt_time': wkt_time,
-        'wkb_time': wkb_time,
-        'wkt_size_kb': wkt_size / 1024,
-        'wkb_size_kb': wkb_size / 1024,
-        'size_reduction': (1 - wkb_size/wkt_size) * 100,
-        'speedup': wkt_time / wkb_time
+        "wkt_time": wkt_time,
+        "wkb_time": wkb_time,
+        "wkt_size_kb": wkt_size / 1024,
+        "wkb_size_kb": wkb_size / 1024,
+        "size_reduction": (1 - wkb_size / wkt_size) * 100,
+        "speedup": wkt_time / wkb_time,
     }
 
 
@@ -367,9 +356,11 @@ def print_benchmark_results():
     print(f"2. Fetch attributes only when possible: {attributes_only['speedup']:.1f}x speedup")
     print(f"3. Use pagination (100-500 features per page) for large datasets")
     print(f"4. Server-side filtering: {filtering['speedup']:.1f}x speedup")
-    print(f"5. Use WKB format: {geometry_format['size_reduction']:.1f}% smaller, {geometry_format['speedup']:.1f}x faster")
+    print(
+        f"5. Use WKB format: {geometry_format['size_reduction']:.1f}% smaller, {geometry_format['speedup']:.1f}x faster"
+    )
     print(f"\nCombined optimizations can provide 10-50x performance improvement!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print_benchmark_results()

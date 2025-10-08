@@ -37,7 +37,7 @@ class TestAuthenticationFlow:
         rate_limiter.record_successful_auth(client)
 
         # 5. Client can make requests
-        assert rate_limiter.check_rate_limit(client, 'normal') is True
+        assert rate_limiter.check_rate_limit(client, "normal") is True
 
     def test_failed_auth_workflow(self, auth_manager, rate_limiter):
         """Test failed authentication workflow"""
@@ -68,8 +68,9 @@ class TestAuthenticationFlow:
 
         # Should be locked out
         from security_improved import SecurityException
+
         with pytest.raises(SecurityException, match="locked out"):
-            rate_limiter.check_rate_limit(client, 'normal')
+            rate_limiter.check_rate_limit(client, "normal")
 
     def test_successful_auth_after_failures(self, auth_manager, rate_limiter):
         """Test successful auth after some failures"""
@@ -179,7 +180,7 @@ class TestAuthenticationPersistence:
 
         # Read raw file
         token_file = token_storage._get_token_path()
-        with open(token_file, 'rb') as f:
+        with open(token_file, "rb") as f:
             raw_content = f.read()
 
         # Plaintext should not be in file
@@ -199,7 +200,7 @@ class TestRateLimitingDuringAuth:
 
         # Authentication has limit of 5 per 15 minutes
         for i in range(6):
-            result = rate_limiter.check_rate_limit(client, 'authentication')
+            result = rate_limiter.check_rate_limit(client, "authentication")
             if i < 5:
                 assert result is True
             else:
@@ -213,7 +214,7 @@ class TestRateLimitingDuringAuth:
         for i in range(10):
             # Check rate limit
             try:
-                if not rate_limiter.check_rate_limit(client, 'authentication'):
+                if not rate_limiter.check_rate_limit(client, "authentication"):
                     break
 
                 # Attempt authentication
@@ -224,8 +225,9 @@ class TestRateLimitingDuringAuth:
 
         # Should have hit either rate limit or lockout
         from security_improved import SecurityException
+
         try:
-            result = rate_limiter.check_rate_limit(client, 'authentication')
+            result = rate_limiter.check_rate_limit(client, "authentication")
             # If we got here, we hit rate limit but not lockout yet
             assert result is False or client in rate_limiter.lockouts
         except SecurityException:
@@ -319,5 +321,5 @@ class TestAuthenticationEdgeCases:
         assert result is False
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

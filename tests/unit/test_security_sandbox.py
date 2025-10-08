@@ -310,20 +310,20 @@ class TestNamespaceIsolation:
         namespace = sandbox.create_safe_namespace()
 
         # Check allowed builtins are present
-        builtins = namespace['__builtins__']
-        assert 'print' in builtins
-        assert 'len' in builtins
-        assert 'int' in builtins
-        assert 'str' in builtins
-        assert 'list' in builtins
-        assert 'dict' in builtins
+        builtins = namespace["__builtins__"]
+        assert "print" in builtins
+        assert "len" in builtins
+        assert "int" in builtins
+        assert "str" in builtins
+        assert "list" in builtins
+        assert "dict" in builtins
 
         # Check dangerous builtins are absent
-        assert 'eval' not in builtins
-        assert 'exec' not in builtins
-        assert 'open' not in builtins
-        assert '__import__' not in builtins
-        assert 'compile' not in builtins
+        assert "eval" not in builtins
+        assert "exec" not in builtins
+        assert "open" not in builtins
+        assert "__import__" not in builtins
+        assert "compile" not in builtins
 
     def test_namespace_isolation(self, sandbox):
         """Test that namespace is isolated"""
@@ -414,8 +414,9 @@ def outer():
 class TestTimeoutEnforcement:
     """Test timeout enforcement (Unix only)"""
 
-    @pytest.mark.skipif(not hasattr(__import__('signal'), 'SIGALRM'),
-                        reason="SIGALRM not available on Windows")
+    @pytest.mark.skipif(
+        not hasattr(__import__("signal"), "SIGALRM"), reason="SIGALRM not available on Windows"
+    )
     def test_timeout_on_infinite_loop(self, sandbox):
         """Test that infinite loops trigger timeout"""
         code = """
@@ -425,8 +426,9 @@ while True:
         with pytest.raises(TimeoutError, match="timeout"):
             sandbox.execute_with_timeout(code)
 
-    @pytest.mark.skipif(not hasattr(__import__('signal'), 'SIGALRM'),
-                        reason="SIGALRM not available on Windows")
+    @pytest.mark.skipif(
+        not hasattr(__import__("signal"), "SIGALRM"), reason="SIGALRM not available on Windows"
+    )
     def test_timeout_on_expensive_computation(self, sandbox):
         """Test that expensive computations trigger timeout"""
         code = """
@@ -442,5 +444,5 @@ for i in range(100000000):
             pass  # Expected on slow systems
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

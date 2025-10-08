@@ -15,11 +15,7 @@ import pytest
 import time
 import hmac
 from pathlib import Path
-from security_improved import (
-    AuthenticationManager,
-    SecureTokenStorage,
-    SecurityException
-)
+from security_improved import AuthenticationManager, SecureTokenStorage, SecurityException
 
 
 class TestTokenGeneration:
@@ -41,7 +37,8 @@ class TestTokenGeneration:
         token = auth_manager.api_token
         # URL-safe base64 uses A-Z, a-z, 0-9, -, _
         import string
-        allowed = set(string.ascii_letters + string.digits + '-_')
+
+        allowed = set(string.ascii_letters + string.digits + "-_")
         assert all(c in allowed for c in token)
 
     def test_token_uniqueness(self):
@@ -106,7 +103,7 @@ class TestTokenVerification:
 
         # Change one character
         if len(token) > 0:
-            wrong_token = token[:-1] + ('X' if token[-1] != 'X' else 'Y')
+            wrong_token = token[:-1] + ("X" if token[-1] != "X" else "Y")
             result = auth_manager.verify_token(client, wrong_token)
             assert result is False
 
@@ -286,7 +283,7 @@ class TestTokenEncryption:
 
         # Read raw file content
         token_file = token_storage._get_token_path()
-        with open(token_file, 'rb') as f:
+        with open(token_file, "rb") as f:
             raw_content = f.read()
 
         # Plaintext should not appear in file
@@ -311,7 +308,7 @@ class TestTokenEncryption:
         """Test that encryption key file is created"""
         token_storage._get_encryption_key()
 
-        key_file = Path.home() / '.qgis_mcp' / '.key'
+        key_file = Path.home() / ".qgis_mcp" / ".key"
         assert key_file.exists()
 
     def test_token_file_created(self, token_storage):
@@ -330,10 +327,7 @@ class TestKeyringIntegration:
         has_keyring = token_storage._check_keyring()
         assert isinstance(has_keyring, bool)
 
-    @pytest.mark.skipif(
-        not SecureTokenStorage()._check_keyring(),
-        reason="Keyring not available"
-    )
+    @pytest.mark.skipif(not SecureTokenStorage()._check_keyring(), reason="Keyring not available")
     def test_keyring_storage_preferred(self):
         """Test that keyring is preferred over file storage"""
         storage = SecureTokenStorage()
@@ -341,15 +335,12 @@ class TestKeyringIntegration:
 
     def test_fallback_to_file_storage(self, monkeypatch):
         """Test fallback to file storage when keyring unavailable"""
+
         # Mock keyring as unavailable
         def mock_check_keyring(self):
             return False
 
-        monkeypatch.setattr(
-            SecureTokenStorage,
-            '_check_keyring',
-            mock_check_keyring
-        )
+        monkeypatch.setattr(SecureTokenStorage, "_check_keyring", mock_check_keyring)
 
         storage = SecureTokenStorage()
         assert storage.keyring_available is False
@@ -397,5 +388,5 @@ class TestAuthenticationManager:
         token_storage.delete_token()
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
