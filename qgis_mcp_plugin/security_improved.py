@@ -340,6 +340,9 @@ class EnhancedPathValidator:
             SecurityException: If path fails validation
         """
         # 1. Early rejection of obvious attacks
+        if not path_str or not path_str.strip():
+            raise SecurityException("Empty path not allowed")
+
         if '..' in path_str:
             raise SecurityException("Path traversal pattern detected")
 
