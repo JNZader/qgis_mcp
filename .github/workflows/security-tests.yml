@@ -38,7 +38,7 @@ jobs:
     - name: Run pytest with coverage
       run: |
         pytest tests/ \
-          --cov=src/qgis_mcp \
+          --cov=qgis_mcp_plugin \
           --cov-report=xml \
           --cov-report=html \
           --cov-report=term-missing \
