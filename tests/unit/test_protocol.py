@@ -195,12 +195,17 @@ class TestLengthPrefixFraming:
 
     def test_message_too_large_blocked(self, protocol_handler):
         """Test that oversized messages are blocked"""
+        from protocol import ProtocolHandler
+
+        # Create handler without schema validation for this test
+        handler = ProtocolHandler(use_msgpack=False, validate_schema=False)
+
         # Create huge message
-        huge_data = "x" * (protocol_handler.MAX_MESSAGE_SIZE + 1)
+        huge_data = "x" * (handler.MAX_MESSAGE_SIZE + 1)
         message = {"type": "ping", "id": "msg_001", "note": huge_data}
 
         with pytest.raises(ProtocolException, match="too large"):
-            protocol_handler.pack_message(message)
+            handler.pack_message(message)
 
     def test_message_at_size_limit(self, protocol_handler):
         """Test message at exact size limit"""
