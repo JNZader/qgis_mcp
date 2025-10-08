@@ -165,6 +165,29 @@ def allowed_directories(temp_dir):
 # ============================================================================
 
 
+@pytest.fixture(autouse=True)
+def mock_keyring_backend(monkeypatch):
+    """Mock keyring backend for all tests (CI/CD compatibility)"""
+    mock_keyring_storage = {}
+
+    def mock_get_password(service, username):
+        return mock_keyring_storage.get(f"{service}:{username}")
+
+    def mock_set_password(service, username, password):
+        mock_keyring_storage[f"{service}:{username}"] = password
+
+    def mock_delete_password(service, username):
+        key = f"{service}:{username}"
+        if key in mock_keyring_storage:
+            del mock_keyring_storage[key]
+
+    import keyring
+
+    monkeypatch.setattr(keyring, "get_password", mock_get_password)
+    monkeypatch.setattr(keyring, "set_password", mock_set_password)
+    monkeypatch.setattr(keyring, "delete_password", mock_delete_password)
+
+
 @pytest.fixture
 def sandbox():
     """Create a code sandbox instance"""
