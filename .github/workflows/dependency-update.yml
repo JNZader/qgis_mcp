@@ -1,0 +1,111 @@
+name: Dependency Update
+
+on:
+  schedule:
+    # Run every Monday at 9:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install pip-tools pip-audit safety
+
+    - name: Check for outdated packages
+      id: outdated
+      run: |
+        pip list --outdated --format=json > outdated.json
+        cat outdated.json
+      continue-on-error: true
+
+    - name: Run security audit
+      id: security
+      run: |
+        pip-audit --desc --format json --output security-audit.json || true
+        pip-audit --desc || true
+      continue-on-error: true
+
+    - name: Run safety check
+      id: safety
+      run: |
+        safety check --json --output safety-check.json || true
+        safety check || true
+      continue-on-error: true
+
+    - name: Create issue for vulnerabilities
+      if: steps.security.outcome == 'failure' || steps.safety.outcome == 'failure'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          let body = '## Security Vulnerabilities Detected\n\n';
+
+          try {
+            const audit = JSON.parse(fs.readFileSync('security-audit.json', 'utf8'));
+            body += '### pip-audit results\n';
+            body += '```json\n' + JSON.stringify(audit, null, 2) + '\n```\n\n';
+          } catch (e) {
+            body += '### pip-audit results\nNo data available\n\n';
+          }
+
+          try {
+            const safety = JSON.parse(fs.readFileSync('safety-check.json', 'utf8'));
+            body += '### Safety check results\n';
+            body += '```json\n' + JSON.stringify(safety, null, 2) + '\n```\n';
+          } catch (e) {
+            body += '### Safety check results\nNo data available\n';
+          }
+
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '[Security] Dependency vulnerabilities detected',
+            body: body,
+            labels: ['security', 'dependencies']
+          });
+
+    - name: Upload audit reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dependency-audit-reports
+        path: |
+          outdated.json
+          security-audit.json
+          safety-check.json
+        retention-days: 30
+
+  dependabot-auto-merge:
+    name: Auto-merge Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+    - name: Dependabot metadata
+      id: metadata
+      uses: dependabot/fetch-metadata@v1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Auto-merge minor/patch updates
+      if: steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch'
+      run: gh pr merge --auto --merge "$PR_URL"
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

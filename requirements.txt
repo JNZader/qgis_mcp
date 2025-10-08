@@ -1,0 +1,15 @@
+# QGIS MCP - Production Runtime Dependencies
+# Pinned exact versions for reproducible builds
+# Last updated: 2025-10-08
+
+# Core Protocol
+msgpack==1.0.7
+jsonschema==4.20.0
+
+# Security & Cryptography
+cryptography==41.0.7
+pyOpenSSL==23.3.0
+keyring==24.3.0
+
+# Additional Security
+certifi==2023.11.17
