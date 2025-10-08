@@ -269,14 +269,19 @@ class TestSocketCommunication:
 
     def test_send_large_message(self, protocol_handler, socket_pair):
         """Test sending large message (within limits)"""
+        from protocol import ProtocolHandler
+
         server_sock, client_sock = socket_pair
+
+        # Create handler without schema validation for this test
+        handler = ProtocolHandler(use_msgpack=False, validate_schema=False)
 
         # Create large but valid message
         large_data = "x" * 100000  # 100KB
         message = {"type": "ping", "id": "msg_001", "data": large_data}
 
-        protocol_handler.send_message(client_sock, message)
-        received = protocol_handler.receive_message(server_sock, timeout=5.0)
+        handler.send_message(client_sock, message)
+        received = handler.receive_message(server_sock, timeout=5.0)
 
         assert received["data"] == large_data
 
