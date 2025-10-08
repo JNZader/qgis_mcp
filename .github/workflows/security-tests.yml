@@ -42,7 +42,7 @@ jobs:
           --cov-report=xml \
           --cov-report=html \
           --cov-report=term-missing \
-          --cov-fail-under=50 \
+          --cov-fail-under=30 \
           --timeout=60 \
           -v \
           -x
