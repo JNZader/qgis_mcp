@@ -50,6 +50,7 @@ class ImprovedCodeSandbox:
         ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
         ast.Is, ast.IsNot, ast.In, ast.NotIn,
         ast.arg, ast.arguments, ast.keyword,
+        ast.Import, ast.ImportFrom, ast.alias,  # Allow imports for validation
     }
 
     # Allowed built-in functions
