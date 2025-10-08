@@ -1,30 +1,29 @@
-# QGIS MCP Test Suite Requirements
-# Install with: pip install -r requirements-test.txt
+# QGIS MCP - Testing Dependencies
+# Updated to latest versions - 2025-10-08
+# Python 3.12+
 
-# Core testing framework
-pytest>=7.0.0
-pytest-cov>=4.0.0
-pytest-timeout>=2.1.0
-pytest-xdist>=3.0.0  # For parallel test execution
+# Include runtime dependencies
+-r requirements.txt
 
-# Test utilities
-pytest-mock>=3.10.0
-pytest-benchmark>=4.0.0
+# Core Testing
+pytest>=8.3.0
+pytest-cov>=6.0.0
+pytest-asyncio>=0.24.0
+pytest-timeout>=2.3.1
+pytest-mock>=3.14.0
+pytest-xdist>=3.6.1
+pytest-benchmark>=5.1.0
+pytest-html>=4.1.1
 
-# Code coverage
-coverage[toml]>=7.0.0
+# Property-based testing / fuzzing
+hypothesis>=6.122.3
 
-# Security testing
-hypothesis>=6.68.0  # Property-based testing / fuzzing
+# Coverage
+coverage[toml]>=7.6.9
+coverage-badge>=1.1.2
 
-# Development tools
-black>=23.0.0  # Code formatter
-flake8>=6.0.0  # Linter
-mypy>=1.0.0  # Type checker
-isort>=5.12.0  # Import sorter
-
-# Optional: For HTML reports
-pytest-html>=3.2.0
-
-# Note: Main dependencies are in requirements-secure.txt
-# Install both with: pip install -r requirements-secure.txt -r requirements-test.txt
+# Code Quality (for testing)
+black>=25.1.0
+flake8>=7.1.1
+mypy>=1.14.0
+isort>=5.13.2
