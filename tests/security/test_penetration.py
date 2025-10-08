@@ -263,14 +263,17 @@ class TestBufferOverflowAttacks:
 
     def test_message_size_limit_enforced(self, protocol_handler):
         """Test that message size limits are enforced"""
-        from protocol import ProtocolException
+        from protocol import ProtocolException, ProtocolHandler
+
+        # Create handler without schema validation for this test
+        handler = ProtocolHandler(use_msgpack=False, validate_schema=False)
 
         # Try to create oversized message
-        huge_data = "x" * (protocol_handler.MAX_MESSAGE_SIZE + 1)
+        huge_data = "x" * (handler.MAX_MESSAGE_SIZE + 1)
         message = {"type": "ping", "id": "msg_001", "data": huge_data}
 
         with pytest.raises(ProtocolException, match="too large"):
-            protocol_handler.pack_message(message)
+            handler.pack_message(message)
 
     def test_buffer_overflow_protection(self, buffered_protocol):
         """Test buffered protocol overflow protection"""
