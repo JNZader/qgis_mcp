@@ -115,14 +115,13 @@ filterwarnings = [
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["src"]
+source = ["qgis_mcp_plugin"]
 branch = true
 omit = [
     "*/tests/*",
     "*/test_*.py",
     "*/__pycache__/*",
     "*/site-packages/*",
-    "*/qgis_mcp_plugin/*",
 ]
 parallel = true
 
