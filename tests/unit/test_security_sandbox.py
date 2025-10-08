@@ -234,7 +234,7 @@ class TestDangerousAttributes:
 
     def test_import_attribute_blocked(self, sandbox):
         """Test that __import__ access is blocked"""
-        with pytest.raises(SecurityException, match="Dangerous"):
+        with pytest.raises(SecurityException, match="dangerous"):
             sandbox.validate_code("x = __import__")
 
 
