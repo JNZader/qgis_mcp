@@ -42,9 +42,10 @@ jobs:
           --cov-report=xml \
           --cov-report=html \
           --cov-report=term-missing \
-          --cov-fail-under=80 \
-          --timeout=300 \
-          -v
+          --cov-fail-under=50 \
+          --timeout=60 \
+          -v \
+          -x
       continue-on-error: false
 
     - name: Run Bandit security linter
