@@ -276,23 +276,8 @@ def tls_handler(temp_dir):
 @pytest.fixture
 def tls_socket_pair(tls_handler):
     """Create a pair of connected TLS sockets"""
-    # Create server socket
-    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_sock.bind(("127.0.0.1", 0))
-    server_sock.listen(1)
-
-    port = server_sock.getsockname()[1]
-
     # Skip TLS socket tests in CI - they have threading/handshake issues
     pytest.skip("TLS socket pair tests disabled in CI due to handshake deadlock")
-
-    yield server_ssl, client_ssl
-
-    # Cleanup
-    server_ssl.close()
-    client_ssl.close()
-    server_sock.close()
 
 
 # ============================================================================
